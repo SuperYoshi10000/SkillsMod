@@ -1,0 +1,16 @@
+{
+  "base": 0.7,
+  "id": "skills:movement_speed",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:movement_speed",
+        "id": "skills:upgrade/movement_speed",
+        "operation": "add_multiplied_base",
+        "value": 0.015
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

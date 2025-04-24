@@ -1,0 +1,17 @@
+{
+  "base": 0.08,
+  "id": "skills:gravity",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:gravity",
+        "id": "skills:upgrade/gravity",
+        "operation": "add_multiplied_base",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100,
+  "enabled": false
+}

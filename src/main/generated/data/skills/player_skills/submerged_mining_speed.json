@@ -1,0 +1,16 @@
+{
+  "base": 0.2,
+  "id": "skills:submerged_mining_speed",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:submerged_mining_speed",
+        "id": "skills:upgrade/submerged_mining_speed",
+        "operation": "add_multiplied_base",
+        "value": 0.04
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

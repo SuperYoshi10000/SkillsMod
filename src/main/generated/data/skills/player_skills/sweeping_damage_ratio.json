@@ -1,0 +1,16 @@
+{
+  "base": 0.0,
+  "id": "skills:sweeping_damage_ratio",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:sweeping_damage_ratio",
+        "id": "skills:upgrade/sweeping_damage_ratio",
+        "operation": "add_value",
+        "value": 0.01
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

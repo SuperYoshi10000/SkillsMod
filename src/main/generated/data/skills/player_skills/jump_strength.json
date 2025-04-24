@@ -1,0 +1,16 @@
+{
+  "base": 0.41999998688697815,
+  "id": "skills:jump_strength",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:jump_strength",
+        "id": "skills:upgrade/jump_strength",
+        "operation": "add_multiplied_base",
+        "value": 0.005
+      }
+    ],
+    "xp": 10
+  },
+  "max_level": 100
+}

@@ -1,0 +1,16 @@
+{
+  "base": 0.0,
+  "id": "skills:oxygen_bonus",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:oxygen_bonus",
+        "id": "skills:upgrade/oxygen_bonus",
+        "operation": "add_value",
+        "value": 1
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

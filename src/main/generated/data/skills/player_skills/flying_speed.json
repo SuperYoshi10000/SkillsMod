@@ -1,0 +1,17 @@
+{
+  "base": 0.4,
+  "id": "skills:flying_speed",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:flying_speed",
+        "id": "skills:upgrade/flying_speed",
+        "operation": "add_multiplied_base",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100,
+  "enabled": false
+}

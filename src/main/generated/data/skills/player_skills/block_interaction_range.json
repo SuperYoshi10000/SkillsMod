@@ -1,0 +1,16 @@
+{
+  "base": 4.5,
+  "id": "skills:block_interaction_range",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:block_interaction_range",
+        "id": "skills:upgrade/block_interaction_range",
+        "operation": "add_value",
+        "value": 0.025
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

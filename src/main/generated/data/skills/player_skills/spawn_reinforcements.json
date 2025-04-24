@@ -1,0 +1,17 @@
+{
+  "base": 0.0,
+  "id": "skills:spawn_reinforcements",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:spawn_reinforcements",
+        "id": "skills:upgrade/spawn_reinforcements",
+        "operation": "add_multiplied_base",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100,
+  "enabled": false
+}

@@ -1,0 +1,16 @@
+{
+  "base": 0.0,
+  "id": "skills:explosion_knockback_resistance",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:explosion_knockback_resistance",
+        "id": "skills:upgrade/explosion_knockback_resistance",
+        "operation": "add_value",
+        "value": 0.009
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

@@ -1,0 +1,16 @@
+{
+  "base": 20.0,
+  "id": "skills:max_health",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:max_health",
+        "id": "skills:upgrade/max_health",
+        "operation": "add_value",
+        "value": 1
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 40
+}

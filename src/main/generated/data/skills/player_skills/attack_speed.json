@@ -1,0 +1,16 @@
+{
+  "base": 4.0,
+  "id": "skills:attack_speed",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:attack_speed",
+        "id": "skills:upgrade/attack_speed",
+        "operation": "add_multiplied_base",
+        "value": 0.01
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

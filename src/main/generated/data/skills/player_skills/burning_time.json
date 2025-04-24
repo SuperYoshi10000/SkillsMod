@@ -1,0 +1,16 @@
+{
+  "base": 1.0,
+  "id": "skills:reduce_burning_time",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:burning_time",
+        "id": "skills:upgrade/reduce_burning_time",
+        "operation": "add_value",
+        "value": -0.01
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

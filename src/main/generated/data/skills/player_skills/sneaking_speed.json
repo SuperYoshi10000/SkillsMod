@@ -1,0 +1,16 @@
+{
+  "base": 0.3,
+  "id": "skills:sneaking_speed",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:sneaking_speed",
+        "id": "skills:upgrade/sneaking_speed",
+        "operation": "add_value",
+        "value": 0.007
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

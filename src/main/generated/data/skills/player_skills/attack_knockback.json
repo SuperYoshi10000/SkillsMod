@@ -1,0 +1,16 @@
+{
+  "base": 0.0,
+  "id": "skills:attack_knockback",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:attack_knockback",
+        "id": "skills:upgrade/attack_knockback",
+        "operation": "add_value",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

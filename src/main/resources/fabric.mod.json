@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "skills",
+  "version": "${version}",
+  "name": "Skills Mod",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "GPL-3.0",
+  "icon": "assets/skills/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "local.ytk.skillsmod.client.SkillsModClient"
+    ],
+    "main": [
+      "local.ytk.skillsmod.SkillsMod"
+    ],
+    "fabric-datagen": [
+      "local.ytk.skillsmod.datagen.SkillsModDataGenerator"
+    ]
+  },
+  "mixins": [
+    "skills.mixins.json",
+    {
+      "config": "skills.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "base": 1.0,
+  "id": "skills:scale",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:scale",
+        "id": "skills:upgrade/scale",
+        "operation": "add_multiplied_base",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100,
+  "enabled": false
+}

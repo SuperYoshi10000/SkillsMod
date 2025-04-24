@@ -1,0 +1,16 @@
+{
+  "base": 2.0,
+  "id": "skills:attack_damage",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:attack_damage",
+        "id": "skills:upgrade/attack_damage",
+        "operation": "add_value",
+        "value": 0.04
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

@@ -1,0 +1,16 @@
+{
+  "base": 3.0,
+  "id": "skills:entity_interaction_range",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:entity_interaction_range",
+        "id": "skills:upgrade/entity_interaction_range",
+        "operation": "add_value",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

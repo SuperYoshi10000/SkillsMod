@@ -1,0 +1,17 @@
+{
+  "base": 32.0,
+  "id": "skills:follow_range",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:follow_range",
+        "id": "skills:upgrade/follow_range",
+        "operation": "add_multiplied_base",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100,
+  "enabled": false
+}

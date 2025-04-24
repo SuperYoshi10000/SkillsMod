@@ -1,0 +1,17 @@
+{
+  "base": 0.0,
+  "id": "skills:mining_efficiency",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:mining_efficiency",
+        "id": "skills:upgrade/mining_efficiency",
+        "operation": "add_multiplied_base",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100,
+  "enabled": false
+}

@@ -1,0 +1,16 @@
+{
+  "base": 1.0,
+  "id": "skills:fall_damage_multiplier",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:fall_damage_multiplier",
+        "id": "skills:upgrade/fall_damage_multiplier",
+        "operation": "add_value",
+        "value": -0.008
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

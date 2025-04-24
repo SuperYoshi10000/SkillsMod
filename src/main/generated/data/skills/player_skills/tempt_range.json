@@ -1,0 +1,17 @@
+{
+  "base": 10.0,
+  "id": "skills:tempt_range",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:tempt_range",
+        "id": "skills:upgrade/tempt_range",
+        "operation": "add_multiplied_base",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100,
+  "enabled": false
+}

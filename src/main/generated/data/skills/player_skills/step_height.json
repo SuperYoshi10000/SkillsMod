@@ -1,0 +1,16 @@
+{
+  "base": 0.6,
+  "id": "skills:step_height",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:step_height",
+        "id": "skills:upgrade/step_height",
+        "operation": "add_value",
+        "value": 0.01
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

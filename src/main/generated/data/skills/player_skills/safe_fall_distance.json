@@ -1,0 +1,16 @@
+{
+  "base": 3.0,
+  "id": "skills:safe_fall_distance",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:safe_fall_distance",
+        "id": "skills:upgrade/safe_fall_distance",
+        "operation": "add_value",
+        "value": 0.05
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

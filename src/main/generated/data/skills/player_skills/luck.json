@@ -1,0 +1,16 @@
+{
+  "base": 0.0,
+  "id": "skills:luck",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:luck",
+        "id": "skills:upgrade/luck",
+        "operation": "add_value",
+        "value": 1
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

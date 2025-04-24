@@ -1,0 +1,17 @@
+{
+  "base": 0.0,
+  "id": "skills:max_absorption",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:max_absorption",
+        "id": "skills:upgrade/max_absorption",
+        "operation": "add_value",
+        "value": 1
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 20,
+  "enabled": false
+}

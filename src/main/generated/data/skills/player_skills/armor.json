@@ -1,0 +1,16 @@
+{
+  "base": 0.0,
+  "id": "skills:armor",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:armor",
+        "id": "skills:upgrade/armor",
+        "operation": "add_value",
+        "value": 0.03
+      }
+    ],
+    "xp": 10
+  },
+  "max_level": 100
+}

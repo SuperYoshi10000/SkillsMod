@@ -1,0 +1,16 @@
+{
+  "base": 1.0,
+  "id": "skills:block_break_speed",
+  "levels": {
+    "modifiers": [
+      {
+        "attribute": "minecraft:block_break_speed",
+        "id": "skills:upgrade/block_break_speed",
+        "operation": "add_multiplied_base",
+        "value": 0.02
+      }
+    ],
+    "xp": 20
+  },
+  "max_level": 100
+}

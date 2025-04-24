@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Player Skills",
+  "description": "Player skills are used to modify the player's attributes and abilities.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "base": { "type": "number" },
+    "max_level": { "type": "number" },
+    "levels": {
+      "oneOf": [{
+        "type": "object",
+        "properties": {
+          "xp": { "type": "number" },
+          "modifiers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attribute": { "type": "string" },
+                "id": { "type": "string" },
+                "operation": { "enum": ["add_value", "add_multiplied_base", "add_multiplied_total"] },
+                "value": { "type": "number" }
+              },
+              "required": ["attribute", "id", "operation", "value"]
+            }
+          }
+        }
+      }, {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "xp": { "type": "number" },
+            "modifiers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "attribute": { "type": "string" },
+                  "id": { "type": "string" },
+                  "operation": { "enum": ["add_value", "add_multiplied_base", "add_multiplied_total"] },
+                  "value": { "type": "number" }
+                },
+                "required": ["attribute", "id", "operation", "value"]
+              }
+            }
+          }
+        }
+      }]
+    },
+    "stack_lower_levels": { "type": "boolean" },
+    "xp_required": { "type": "array", "items": { "type": "number" } },
+    "enabled": { "type": "boolean" }
+  },
+  "required": ["id", "base", "max_level", "levels"]
+}
