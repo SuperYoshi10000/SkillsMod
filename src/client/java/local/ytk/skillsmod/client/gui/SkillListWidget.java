@@ -26,7 +26,7 @@ public class SkillListWidget extends ElementListWidget<SkillListWidget.SkillList
         playerSkillList = ((HasSkills) player).getSkills();
         
         SkillManager.INSTANCE.skills.forEach((id, skill) -> {
-            Text skillName = Text.translatable(id.toTranslationKey());
+            Text skillName = Text.translatable(id.toTranslationKey("skill"));
             SkillInstance skillInstance = playerSkillList.skills().computeIfAbsent(skill, SkillInstance::new);
             SkillWidget skillWidget = new SkillWidget(0, 0, width, itemHeight, skillName, skillInstance);
             addEntry(new SkillListWidgetEntry(skillWidget));

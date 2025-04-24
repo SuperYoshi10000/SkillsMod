@@ -28,7 +28,7 @@ public record SkillList(Map<Skill, SkillInstance> skills) {
     public SkillInstance getSkillInstance(Identifier id) {
         Skill skill = SkillManager.getSkill(id);
         if (skill == null) return null;
-        return skills.get(skill);
+        return skills.computeIfAbsent(skill, SkillInstance::new);
     }
     
     public static SkillList fromNbt(NbtCompound nbt) {

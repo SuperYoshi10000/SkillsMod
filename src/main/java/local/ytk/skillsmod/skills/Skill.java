@@ -48,7 +48,7 @@ public class Skill {
     
     public Skill(Identifier id, int base, int maxLevel, Either<Level, List<Level>> levels, boolean stackLowerLevels, @Nullable IntList xpRequired) {
         this.id = id;
-        this.key = id.toTranslationKey("player_skills");
+        this.key = id.toTranslationKey("skill");
 //        this.attribute = attribute;
         this.base = base;
         this.maxLevel = maxLevel;
@@ -70,7 +70,7 @@ public class Skill {
     }
     public Skill(Identifier id, int base, int maxLevel, List<Level> levels, boolean stackLowerLevels) {
         this.id = id;
-        this.key = id.toTranslationKey("player_skills");
+        this.key = id.toTranslationKey("skill");
 //        this.attribute = attribute;
         this.base = base;
         this.maxLevel = maxLevel;
@@ -81,7 +81,7 @@ public class Skill {
     }
     public Skill(Identifier id, int base, int maxLevel, Level allLevels, IntList xpRequired) {
         this.id = id;
-        this.key = id.toTranslationKey("player_skills");
+        this.key = id.toTranslationKey("skill");
         this.base = base;
         this.maxLevel = maxLevel;
         this.levels = Collections.nCopies(maxLevel, allLevels);

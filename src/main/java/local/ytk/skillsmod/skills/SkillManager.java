@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import it.unimi.dsi.fastutil.ints.IntList;
 import local.ytk.skillsmod.SkillsMod;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.LifecycledResourceManager;
@@ -18,12 +19,13 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SkillManager implements SimpleSynchronousResourceReloadListener {
     public static final Gson GSON = new Gson();
-    public static final Identifier ID = Identifier.of(SkillsMod.MOD_ID, "player_skills");
+    public static final Identifier ID = Identifier.of(SkillsMod.MOD_ID, "skill");
     public static final SkillManager INSTANCE = new SkillManager();
     private static final Logger LOGGER = LoggerFactory.getLogger(SkillManager.class);
     
@@ -43,7 +45,10 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
     }
     
     public static SkillInstance createInstance(Identifier id) {
-        return INSTANCE.skills.get(id).createInstance();
+        return INSTANCE.skills.computeIfAbsent(id, s -> {
+            LOGGER.error("Skill not found: {}", id);
+            return new Skill(id, 0, 100, new Skill.Level(100, List.of()), IntList.of());
+        }).createInstance();
     }
     
     @Override
@@ -53,7 +58,7 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
     
     @Override
     public void reload(ResourceManager manager) {
-        Map<Identifier, Resource> resources = manager.findResources("player_skills", path -> path.getPath().endsWith(".json"));
+        Map<Identifier, Resource> resources = manager.findResources("skill", path -> path.getPath().endsWith(".json"));
         for (Map.Entry<Identifier, Resource> entry : resources.entrySet()) {
             Identifier id = entry.getKey();
             Resource resource = entry.getValue();
@@ -66,7 +71,7 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
                 Pair<Skill, JsonElement> pair = result.getPartialOrThrow(IllegalArgumentException::new);
                 Skill skill = pair.getFirst();
                 // Register the skill
-                skills.put(id, skill);
+                skills.put(skill.id, skill);
             } catch (Exception e) {
                 // Ignore the error for now
                 //throw new RuntimeException("Failed to load skill " + id, e);
