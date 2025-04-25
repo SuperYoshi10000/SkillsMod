@@ -8,6 +8,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
@@ -19,7 +20,7 @@ public class SkillListWidget extends ElementListWidget<SkillListWidget.SkillList
     private final PlayerEntity player;
     private final SkillList playerSkillList;
     
-    public SkillListWidget(MinecraftClient minecraftClient, int width, int height, int y, int itemHeight) {
+    public SkillListWidget(MinecraftClient minecraftClient, SkillsScreen screen, int width, int height, int y, int itemHeight) {
         super(minecraftClient, width, height, y, itemHeight, HEADER_HEIGHT);
         player = minecraftClient.player;
         if (player == null) throw new IllegalStateException("Player is null");
@@ -28,7 +29,7 @@ public class SkillListWidget extends ElementListWidget<SkillListWidget.SkillList
         SkillManager.INSTANCE.skills.forEach((id, skill) -> {
             Text skillName = Text.translatable(id.toTranslationKey("skill"));
             SkillInstance skillInstance = playerSkillList.skills().computeIfAbsent(skill, SkillInstance::new);
-            SkillWidget skillWidget = new SkillWidget(0, 0, width, itemHeight, skillName, skillInstance);
+            SkillWidget skillWidget = new SkillWidget(width, itemHeight, skillInstance, screen);
             addEntry(new SkillListWidgetEntry(skillWidget));
         });
     }

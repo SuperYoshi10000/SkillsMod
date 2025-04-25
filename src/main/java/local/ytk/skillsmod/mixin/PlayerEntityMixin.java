@@ -52,7 +52,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements HasSkill
         // Add attributes for skills
         SkillList skillList = dataTracker.get(SKILL_TRACKER);
         for (SkillInstance skill : skillList.skills().values()) {
-            for (LinkedEntityAttributeModifier modifier : skill.skill.levels.get(skill.level).modifiers()) {
+            if (skill.level == 0) continue; // No need to add attributes for level 0
+            for (LinkedEntityAttributeModifier modifier : skill.skill.getOptimizedModifiers(Math.min(skill.level, skill.skill.maxLevel) - 1)) {
                 EntityAttributeInstance attributeInstance = getAttributeInstance(modifier.attributeEntry());
                 if (attributeInstance == null) attributeInstance = new EntityAttributeInstance(modifier.attributeEntry(), a -> {});
                 attributeInstance.updateModifier(modifier.toEntityAttributeModifier());

@@ -4,6 +4,8 @@
   "package": "local.ytk.skillsmod.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "BakedModelManagerMixin",
+    "MinecraftClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1

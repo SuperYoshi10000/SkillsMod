@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class SkillManager implements SimpleSynchronousResourceReloadListener {
     public static final Gson GSON = new Gson();
-    public static final Identifier ID = Identifier.of(SkillsMod.MOD_ID, "skill");
+    public static final Identifier ID = SkillsMod.id("skills");
     public static final SkillManager INSTANCE = new SkillManager();
     private static final Logger LOGGER = LoggerFactory.getLogger(SkillManager.class);
     
@@ -47,7 +47,7 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
     public static SkillInstance createInstance(Identifier id) {
         return INSTANCE.skills.computeIfAbsent(id, s -> {
             LOGGER.error("Skill not found: {}", id);
-            return new Skill(id, 0, 100, new Skill.Level(100, List.of()), IntList.of());
+            return new Skill(id, 0, 100, new Skill.Level(100, List.of()), IntList.of(), id);
         }).createInstance();
     }
     

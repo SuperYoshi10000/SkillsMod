@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record ProvideDataPayload<T>(String id, NbtCompound data) implements CustomPayload {
-    public static final Identifier ID = Identifier.of(SkillsMod.MOD_ID, "update_data");
+    public static final Identifier ID = SkillsMod.id("update_data");
     public static final CustomPayload.Id<ProvideDataPayload<?>> PAYLOAD_ID = new CustomPayload.Id<>(ID);
     public static final PacketCodec<RegistryByteBuf, ProvideDataPayload<?>> PACKET_CODEC = PacketCodec.ofStatic(
             ProvideDataPayload::write, ProvideDataPayload::new

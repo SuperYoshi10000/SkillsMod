@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 
 public record RequestDataPayload(String id, List<String> keys) implements CustomPayload {
-    public static final Identifier ID = Identifier.of(SkillsMod.MOD_ID, "update_data");
+    public static final Identifier ID = SkillsMod.id("update_data");
     public static final CustomPayload.Id<RequestDataPayload> PAYLOAD_ID = new CustomPayload.Id<>(ID);
     public static final PacketCodec<RegistryByteBuf, RequestDataPayload> PACKET_CODEC = PacketCodec.ofStatic(
             RequestDataPayload::write,

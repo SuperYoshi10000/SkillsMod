@@ -9,6 +9,7 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class SkillInstance {
@@ -57,6 +58,23 @@ public class SkillInstance {
         this.xp = xp;
     }
     
+    public void moveXp(int xp, PlayerEntity player) {
+        addXp(xp, player);
+        // Copied from PlayerEntity, with addScore removed
+        player.experienceProgress = player.experienceProgress + (float)xp / player.getNextLevelExperience();
+        player.totalExperience = MathHelper.clamp(player.totalExperience + xp, 0, Integer.MAX_VALUE);
+        
+        while (player.experienceProgress < 0.0F) {
+            float f = player.experienceProgress * player.getNextLevelExperience();
+            if (player.experienceLevel > 0) {
+                player.addExperienceLevels(-1);
+                player.experienceProgress = 1.0F + f / player.getNextLevelExperience();
+            } else {
+                player.addExperienceLevels(-1);
+                player.experienceProgress = 0.0F;
+            }
+        }
+    }
     public void addXp(int xp, @Nullable PlayerEntity player) {
         this.xp += xp;
         // `level - 1` is used because first level is 1 but levels list is 0 indexed

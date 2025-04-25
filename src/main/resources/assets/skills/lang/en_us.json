@@ -17,6 +17,7 @@
   
   "gui.skills.title": "Skills",
   "gui.skills.level": "Level %s/%s - %s/%sxp (%s%%)",
+  "gui.skills.level.max": "Level %s - Max",
   
   "key.skills.open_skills_menu": "Open Skills Menu",
   

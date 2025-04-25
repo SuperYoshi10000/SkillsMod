@@ -26,7 +26,8 @@ public class Skill {
             Codec.INT.fieldOf("max_level").forGetter(Skill::maxLevel),
             Codec.either(Level.CODEC, Level.CODEC.listOf()).fieldOf("levels").forGetter(s -> Either.right(s.levels())),
             Codec.BOOL.optionalFieldOf("stack_lower_levels", false).forGetter(Skill::stackLowerLevels),
-            Codec.INT_STREAM.optionalFieldOf("xp_required").xmap(s -> s.map(IntStream::toArray).map(IntList::of).orElse(IntList.of()), l -> Optional.ofNullable(l).map(IntCollection::intStream)).forGetter(Skill::xpRequired)
+            Codec.INT_STREAM.optionalFieldOf("xp_required").xmap(s -> s.map(IntStream::toArray).map(IntList::of).orElse(IntList.of()), l -> Optional.ofNullable(l).map(IntCollection::intStream)).forGetter(Skill::xpRequired),
+            Identifier.CODEC.optionalFieldOf("icon", Identifier.ofVanilla("empty")).forGetter(s -> s.id)
     ).apply(instance, Skill::new));
     public static final Codec<Skill> ID_CODEC = Identifier.CODEC.xmap(SkillManager::getSkill, Skill::id);
     
@@ -45,13 +46,16 @@ public class Skill {
     // XP required for each level, if not provided, defaults to 0, 100, 200, ...
     // Only used when using 'allLevels'
     public final IntList xpRequired;
+    @Nullable
+    public final Identifier iconId;
     
-    public Skill(Identifier id, int base, int maxLevel, Either<Level, List<Level>> levels, boolean stackLowerLevels, @Nullable IntList xpRequired) {
+    public Skill(Identifier id, int base, int maxLevel, Either<Level, List<Level>> levels, boolean stackLowerLevels, @Nullable IntList xpRequired, @Nullable Identifier iconId) {
         this.id = id;
         this.key = id.toTranslationKey("skill");
 //        this.attribute = attribute;
         this.base = base;
         this.maxLevel = maxLevel;
+        this.iconId = iconId;
         if (levels.left().isPresent()) {
             Level level = levels.left().get();
             this.levels = Collections.nCopies(maxLevel, level);
@@ -68,7 +72,7 @@ public class Skill {
             throw new IllegalArgumentException("Either a single level or a list of levels must be provided");
         }
     }
-    public Skill(Identifier id, int base, int maxLevel, List<Level> levels, boolean stackLowerLevels) {
+    public Skill(Identifier id, int base, int maxLevel, List<Level> levels, boolean stackLowerLevels, @Nullable Identifier iconId) {
         this.id = id;
         this.key = id.toTranslationKey("skill");
 //        this.attribute = attribute;
@@ -78,8 +82,10 @@ public class Skill {
         this.allLevels = null;
         this.stackLowerLevels = stackLowerLevels;
         this.xpRequired = null;
+        this.iconId = iconId;
     }
-    public Skill(Identifier id, int base, int maxLevel, Level allLevels, IntList xpRequired) {
+    @SuppressWarnings("all")
+    public Skill(Identifier id, int base, int maxLevel, Level allLevels, IntList xpRequired, @Nullable Identifier iconId) {
         this.id = id;
         this.key = id.toTranslationKey("skill");
         this.base = base;
@@ -88,6 +94,7 @@ public class Skill {
         this.allLevels = allLevels;
         this.stackLowerLevels = true;
         this.xpRequired = xpRequired;
+        this.iconId = iconId;
     }
     
     public static Stream<LinkedEntityAttributeModifier> mergeSimilar(Map.Entry<EntityAttribute, Collection<LinkedEntityAttributeModifier>> e) {
@@ -154,14 +161,20 @@ public class Skill {
     }
     
     public int xpRequired(int level) {
+        if (level < 0) throw new IllegalArgumentException("Level must be at least 1");
+        if (level == 0) return 0;
+        if (level > maxLevel) level = maxLevel;
         if (xpRequired == null) {
             if (allLevels != null) return allLevels.xpRequired * level;
-            return levels.get(level).xpRequired;
+            return levels.get(level - 1).xpRequired;
         } else {
-            return xpRequired.getInt(level);
+            return xpRequired.getInt(level - 1);
         }
     }
     public List<LinkedEntityAttributeModifier> getModifiers(int level) {
+        if (level < 0) throw new IllegalArgumentException("Level must be at least 1");
+        if (level == 0) return List.of();
+        if (level > maxLevel) level = maxLevel;
         if (allLevels != null) {
             return Collections.nCopies(level, allLevels).stream().flatMap(l -> l.modifiers.stream()).toList();
         } else if (stackLowerLevels) {
@@ -171,14 +184,16 @@ public class Skill {
         }
     }
     public List<LinkedEntityAttributeModifier> getOptimizedModifiers(int level) {
+        if (level < 0) throw new IllegalArgumentException("Level must be at least 1");
+        if (level == 0) return List.of();
         if (allLevels != null) {
             return allLevels.modifiers.stream().map(m -> new LinkedEntityAttributeModifier(m.attribute(), m.id(), m.value() * level, m.operation())).toList();
         } else if (stackLowerLevels) {
             Multimap<EntityAttribute, LinkedEntityAttributeModifier> map = HashMultimap.create();
-            levels.subList(0, level).forEach(l -> l.modifiers.forEach(m -> map.put(m.attribute(), m)));
+            levels.subList(0, level > maxLevel ? maxLevel - 1 : level - 1).forEach(l -> l.modifiers.forEach(m -> map.put(m.attribute(), m)));
             return map.asMap().entrySet().stream().flatMap(Skill::mergeSimilar).toList();
         } else {
-            return levels.get(level - 1).modifiers; // No optimization needed
+            return levels.get(Math.min(level, maxLevel) - 1).modifiers; // No optimization needed
         }
     }
     

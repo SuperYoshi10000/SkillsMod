@@ -1,13 +1,14 @@
 package local.ytk.skillsmod.client.gui;
 
+import local.ytk.skillsmod.SkillsMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.gui.screen.world.WorldListWidget;
-import net.minecraft.client.gui.widget.ScrollableWidget;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+
+import java.util.function.Function;
 
 public class SkillsScreen extends Screen {
     public SkillListWidget skillList;
@@ -23,7 +24,7 @@ public class SkillsScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        skillList = new SkillListWidget(client, 300, this.height, 0, 30);
+        skillList = new SkillListWidget(client, this, Math.clamp(this.width, 300, 500), this.height, 0, 24);
         skillList.setX(width / 2 - skillList.getWidth() / 2);
     }
     

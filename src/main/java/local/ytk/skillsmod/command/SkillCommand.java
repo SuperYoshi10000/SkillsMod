@@ -9,17 +9,23 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import local.ytk.skillsmod.skills.*;
+import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.command.suggestion.SuggestionProviders;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.predicate.NumberRange;
+import net.minecraft.server.command.DataCommand;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.ParsedSelector;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -31,13 +37,12 @@ public class SkillCommand {
     
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("skill")
+                .requires(source -> source.hasPermissionLevel(2)) // Cheats enabled, creative mode, or operator
                 .then(literal("list")
                         .executes(SkillCommand::listAllSkills)
                         .then(literal("all").executes(SkillCommand::listAllSkills))
                         .then(literal("for")
-                                .then(argument("player", EntityArgumentType.player()).executes(SkillCommand::listSkillsForPlayer))
-                        )
-                )
+                                .then(argument("player", EntityArgumentType.player()).executes(SkillCommand::listSkillsForPlayer))))
                 .then(literal("get")
                         .then(argument("player", EntityArgumentType.player())
                                 .executes(SkillCommand::listSkillsForPlayer)
@@ -45,41 +50,27 @@ public class SkillCommand {
                                         .suggests(SkillCommand.SKILLS_SUGGESTIONS)
                                         .executes(SkillCommand::getSkill)
                                         .then(literal("level").executes(SkillCommand::getSkillLevel))
-                                        .then(literal("xp").executes(SkillCommand::getSkillXp))
-                                )
-                        )
-                )
+                                        .then(literal("xp").executes(SkillCommand::getSkillXp)))))
                 .then(literal("set")
                         .then(argument("player", EntityArgumentType.player())
                                 .then(argument("skill", IdentifierArgumentType.identifier())
                                         .suggests(SkillCommand.SKILLS_SUGGESTIONS)
                                         .then(argument("levels", IntegerArgumentType.integer())
                                                 .executes(SkillCommand::setSkillLevel)
-                                                .then(argument("xp", IntegerArgumentType.integer()).executes(SkillCommand::setSkill))
-                                        )
+                                                .then(argument("xp", IntegerArgumentType.integer()).executes(SkillCommand::setSkill)))
                                         .then(literal("level")
-                                                .then(argument("levels", IntegerArgumentType.integer()).executes(SkillCommand::setSkillLevel))
-                                        )
+                                                .then(argument("levels", IntegerArgumentType.integer()).executes(SkillCommand::setSkillLevel)))
                                         .then(literal("xp")
-                                                .then(argument("xp", IntegerArgumentType.integer()).executes(SkillCommand::setSkillXp))
-                                        )
-                                )
-                        )
-                )
+                                                .then(argument("xp", IntegerArgumentType.integer()).executes(SkillCommand::setSkillXp))))))
                 .then(literal("add")
                         .then(argument("player", EntityArgumentType.player())
                                 .then(argument("skill", IdentifierArgumentType.identifier())
                                         .suggests(SkillCommand.SKILLS_SUGGESTIONS)
                                         .then(argument("levels", IntegerArgumentType.integer()).executes(SkillCommand::addSkillLevel))
                                         .then(literal("level")
-                                                .then(argument("levels", IntegerArgumentType.integer()).executes(SkillCommand::addSkillLevel))
-                                        )
+                                                .then(argument("levels", IntegerArgumentType.integer()).executes(SkillCommand::addSkillLevel)))
                                         .then(literal("xp")
-                                                .then(argument("xp", IntegerArgumentType.integer()).executes(SkillCommand::addSkillXp))
-                                        )
-                                )
-                        )
-                )
+                                                .then(argument("xp", IntegerArgumentType.integer()).executes(SkillCommand::addSkillXp))))))
 //                .then(literal("test_list_skills").executes(context -> {
 //                    PlayerEntity player = (PlayerEntity) context.getSource().getEntity();
 //                    assert player != null;
@@ -88,13 +79,16 @@ public class SkillCommand {
 //                    context.getSource().sendFeedback(() -> Text.literal(s), false);
 //                    return 1;
 //                }))
-                
         );
     }
     
     
-    private static @Nullable Text getName(PlayerEntity player) {
-        return player.getDisplayName();
+    private static Text getName(PlayerEntity player) {
+        // Get the name of the player
+        return ParsedSelector.parse(player.getUuidAsString())
+                .map(p -> Text.selector(p, Optional.empty()))
+                .resultOrPartial()
+                .orElse(Text.empty());
     }
     
     static int listAllSkills(CommandContext<ServerCommandSource> context) {
@@ -119,7 +113,7 @@ public class SkillCommand {
                         Text.literal(String.valueOf(s.xp))
                 ).append("\n"))
                 .reduce(Text.empty(), MutableText::append);
-        Text message = Text.translatable("commands.skill.player", context.getSource().getDisplayName()).append("\n").append(items);
+        Text message = Text.translatable("commands.skill.player", getName(player)).append("\n").append(items);
         context.getSource().sendMessage(message);
         return SUCCESS;
     }
@@ -134,7 +128,7 @@ public class SkillCommand {
 //            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
         }
         Text message = Text.translatable("commands.skill.player.value",
-                context.getSource().getDisplayName(),
+                getName(player),
                 Text.translatable(skill.skill.key),
                 Text.literal(String.valueOf(skill.level)),
                 Text.literal(String.valueOf(skill.xp))
@@ -258,10 +252,13 @@ public class SkillCommand {
     public static class SkillSuggestionProvider implements SuggestionProvider<ServerCommandSource> {
         @Override
         public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
+            System.out.println("Getting suggestions for skill command"); // debug
             // Provide suggestions for skills
             SkillManager.getSkills().stream()
                     .filter(skill -> skill.key.equals(builder.getRemaining()))
+                    .peek(System.out::println) // debug
                     .forEach(skill -> builder.suggest(skill.key));
+            System.out.println("Suggestions completed"); // debug
             return builder.buildFuture();
         }
         
