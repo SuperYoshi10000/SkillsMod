@@ -12,5 +12,6 @@
     ],
     "xp": 20
   },
+  "icon": "minecraft:mob_effect/slow_falling",
   "max_level": 100
 }

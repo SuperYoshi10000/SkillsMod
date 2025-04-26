@@ -51,6 +51,7 @@
     },
     "stack_lower_levels": { "type": "boolean" },
     "xp_required": { "type": "array", "items": { "type": "number" } },
+    "icon": { "type": "string", "pattern": "([a-z0-9._-]*:)?[a-z0-9/._-]*" },
     "enabled": { "type": "boolean" }
   },
   "required": ["id", "base", "max_level", "levels"]

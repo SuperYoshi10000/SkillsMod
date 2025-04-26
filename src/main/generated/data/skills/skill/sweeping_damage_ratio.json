@@ -12,5 +12,6 @@
     ],
     "xp": 20
   },
+  "icon": "skills:skill/sweeping_damage",
   "max_level": 100
 }

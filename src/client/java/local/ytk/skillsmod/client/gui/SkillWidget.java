@@ -14,6 +14,7 @@ import net.minecraft.client.texture.StatusEffectSpriteManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
@@ -25,6 +26,8 @@ public class SkillWidget extends ButtonWidget {
     static final int MARGIN_SIDE = 10;
     static final int ICON_SIZE = 18;
     static final int TEXT_OFFSET = 2;
+    static final int TEXT_MAIN_COLOR = 0xffffff;
+    static final int TEXT_ALT_COLOR = 0xbfbfbf;
     private final SkillsScreen screen;
     private final SkillInstance skillInstance;
     public final StatusEffectSpriteManager spriteManager = MinecraftClient.getInstance().getStatusEffectSpriteManager();
@@ -45,6 +48,7 @@ public class SkillWidget extends ButtonWidget {
                 .getSprite(skill.iconId);
     }
     
+    // TODO make button press work
     // Type must be SkillWidget to work - the argument is a ButtonWidget to allow it to be used as a button press action
     public static void press(ButtonWidget button) {
         if (!(button instanceof SkillWidget)) return;
@@ -88,8 +92,8 @@ public class SkillWidget extends ButtonWidget {
         int topLineY = getY() + MARGIN_TOP;
         int bottomLineY = topLineY + LINE_HEIGHT;
 
-        context.drawTextWithShadow(screen.getTextRenderer(), nameText, textX, topLineY, 16777215);
-        context.drawTextWithShadow(screen.getTextRenderer(), levelText, textX, bottomLineY, 8355711);
+        context.drawTextWithShadow(screen.getTextRenderer(), nameText, textX, topLineY, TEXT_MAIN_COLOR);
+        context.drawTextWithShadow(screen.getTextRenderer(), levelText, textX, bottomLineY, TEXT_ALT_COLOR);
         context.drawSpriteStretched(RenderLayer::getGuiTextured, getSkillIcon(skillInstance.skill), imageX, topLineY, ICON_SIZE, ICON_SIZE);
         
         List<LinkedEntityAttributeModifier> modifiers = skillInstance.skill.getOptimizedModifiers(currentLevel);

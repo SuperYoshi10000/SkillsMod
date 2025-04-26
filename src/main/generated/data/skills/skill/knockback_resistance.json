@@ -12,5 +12,6 @@
     ],
     "xp": 20
   },
+  "icon": "skills:skill/knockback_resistance",
   "max_level": 100
 }

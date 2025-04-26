@@ -12,5 +12,6 @@
     ],
     "xp": 20
   },
+  "icon": "skills:skill/attack_speed",
   "max_level": 100
 }

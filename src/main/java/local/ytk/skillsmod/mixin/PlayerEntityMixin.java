@@ -5,13 +5,16 @@ import local.ytk.skillsmod.skills.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -44,7 +47,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements HasSkill
     
     @Inject(method = "initDataTracker", at = @At("TAIL"))
     public void initDataTracker(DataTracker.Builder builder, CallbackInfo info) {
-        builder.add(SKILL_TRACKER, SkillManager.createSkillList()); // CRASH HERE
+        builder.add(SKILL_TRACKER, SkillData.getPlayerState((PlayerEntity) (Object) this).skills());
     }
     
     @Inject(method = "tick", at = @At("TAIL"))
@@ -53,10 +56,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements HasSkill
         SkillList skillList = dataTracker.get(SKILL_TRACKER);
         for (SkillInstance skill : skillList.skills().values()) {
             if (skill.level == 0) continue; // No need to add attributes for level 0
-            for (LinkedEntityAttributeModifier modifier : skill.skill.getOptimizedModifiers(Math.min(skill.level, skill.skill.maxLevel) - 1)) {
+            for (LinkedEntityAttributeModifier modifier : skill.skill.getOptimizedModifiers(Math.min(skill.level, skill.skill.maxLevel))) {
                 EntityAttributeInstance attributeInstance = getAttributeInstance(modifier.attributeEntry());
                 if (attributeInstance == null) attributeInstance = new EntityAttributeInstance(modifier.attributeEntry(), a -> {});
-                attributeInstance.updateModifier(modifier.toEntityAttributeModifier());
+                attributeInstance.overwritePersistentModifier(modifier.toEntityAttributeModifier());
             }
         }
     }
@@ -69,5 +72,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements HasSkill
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     public void readCustomDataFromNbt(NbtCompound nbt, CallbackInfo info) {
         dataTracker.set(SKILL_TRACKER, SkillList.fromNbt(nbt.getCompound("skills").orElse(new NbtCompound())));
+    }
+    
+    // TODO make skill data persistent
+    @Inject(method = "onDeath", at = @At(value="INVOKE", target="Lnet/minecraft/entity/LivingEntity;onDeath(Lnet/minecraft/entity/damage/DamageSource;)V"))
+    public void onDeath(CallbackInfo info) {
+        SkillData.savePlayerState((PlayerEntity) (Object) this);
     }
 }

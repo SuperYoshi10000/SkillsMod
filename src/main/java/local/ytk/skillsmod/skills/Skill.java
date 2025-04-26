@@ -190,7 +190,7 @@ public class Skill {
             return allLevels.modifiers.stream().map(m -> new LinkedEntityAttributeModifier(m.attribute(), m.id(), m.value() * level, m.operation())).toList();
         } else if (stackLowerLevels) {
             Multimap<EntityAttribute, LinkedEntityAttributeModifier> map = HashMultimap.create();
-            levels.subList(0, level > maxLevel ? maxLevel - 1 : level - 1).forEach(l -> l.modifiers.forEach(m -> map.put(m.attribute(), m)));
+            levels.subList(0, Math.min(level, maxLevel)).forEach(l -> l.modifiers.forEach(m -> map.put(m.attribute(), m)));
             return map.asMap().entrySet().stream().flatMap(Skill::mergeSimilar).toList();
         } else {
             return levels.get(Math.min(level, maxLevel) - 1).modifiers; // No optimization needed

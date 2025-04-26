@@ -78,8 +78,8 @@ public class SkillInstance {
     public void addXp(int xp, @Nullable PlayerEntity player) {
         this.xp += xp;
         // `level - 1` is used because first level is 1 but levels list is 0 indexed
-        while (this.xp >= skill.levels.get(level - 1).xpRequired()) {
-            this.xp -= skill.levels.get(level - 1).xpRequired();
+        while (this.xp >= skill.levels.get(level).xpRequired()) {
+            this.xp -= skill.levels.get(level).xpRequired();
             level++;
             MinecraftServer server = player != null ? player.getServer() : null;
             if (level == 1) {
@@ -108,7 +108,9 @@ public class SkillInstance {
     }
     
     public int getXpToNextLevel() {
-        return skill.levels.get(level - 1).xpRequired() - xp;
+        if (level >= skill.maxLevel()) return 0; // Already at max level
+        if (level == 0) return 0; // No XP required for level 0 - this is the starting level
+        return skill.levels.get(level).xpRequired() - xp;
     }
     
     public NbtCompound toNbt() {

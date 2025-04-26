@@ -16,7 +16,7 @@ import net.minecraft.text.Text;
 import java.util.List;
 
 public class SkillListWidget extends ElementListWidget<SkillListWidget.SkillListWidgetEntry> {
-    public static final int HEADER_HEIGHT = 30;
+    public static final int HEADER_HEIGHT = 24;
     private final PlayerEntity player;
     private final SkillList playerSkillList;
     
@@ -56,7 +56,6 @@ public class SkillListWidget extends ElementListWidget<SkillListWidget.SkillList
         
         @Override
         public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            System.out.println("Rendering skill widget: " + skillWidget);
             skillWidget.setX(x);
             skillWidget.setY(y);
             skillWidget.setWidth(entryWidth);
