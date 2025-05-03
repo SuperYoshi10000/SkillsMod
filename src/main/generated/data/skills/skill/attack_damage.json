@@ -7,11 +7,11 @@
         "attribute": "minecraft:attack_damage",
         "id": "skills:upgrade/attack_damage",
         "operation": "add_value",
-        "value": 0.04
+        "value": 0.1
       }
     ],
-    "xp": 20
+    "xp": 35
   },
   "icon": "minecraft:mob_effect/strength",
-  "max_level": 100
+  "max_level": 50
 }

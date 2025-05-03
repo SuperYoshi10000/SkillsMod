@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public record ProvideDataPayload<T>(String id, NbtCompound data) implements CustomPayload {
     public static final Identifier ID = SkillsMod.id("update_data");
     public static final CustomPayload.Id<ProvideDataPayload<?>> PAYLOAD_ID = new CustomPayload.Id<>(ID);

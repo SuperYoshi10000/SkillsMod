@@ -6,6 +6,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -20,7 +21,10 @@ public class SkillInstance {
             Codec.INT.fieldOf("xp").forGetter(SkillInstance::getXp)
     ).apply(instance, SkillInstance::new));
     public static final PacketCodec<RegistryByteBuf, SkillInstance> PACKET_CODEC = PacketCodec.tuple(
-            Identifier.PACKET_CODEC, SkillInstance::getId, SkillManager::createInstance
+            Identifier.PACKET_CODEC, SkillInstance::getId,
+            PacketCodecs.INTEGER, SkillInstance::getLevel,
+            PacketCodecs.INTEGER, SkillInstance::getXp,
+            SkillManager::createInstance
     );
     
     public Skill skill;
@@ -58,7 +62,7 @@ public class SkillInstance {
         this.xp = xp;
     }
     
-    public void moveXp(int xp, PlayerEntity player) {
+    public void spendXp(int xp, PlayerEntity player) {
         addXp(xp, player);
         // Copied from PlayerEntity, with addScore removed
         player.experienceProgress = player.experienceProgress + (float)xp / player.getNextLevelExperience();
@@ -109,7 +113,7 @@ public class SkillInstance {
     
     public int getXpToNextLevel() {
         if (level >= skill.maxLevel()) return 0; // Already at max level
-        if (level == 0) return 0; // No XP required for level 0 - this is the starting level
+//        if (level == 0) return 0; // No XP required for level 0 - this is the starting level
         return skill.levels.get(level).xpRequired() - xp;
     }
     
@@ -119,5 +123,14 @@ public class SkillInstance {
         nbt.putInt("level", level);
         nbt.putInt("xp", xp);
         return nbt;
+    }
+    
+    @Override
+    public String toString() {
+        return "SkillInstance["
+                + "skill=" + skill.id
+                + ", level=" + level
+                + ", xp=" + xp
+                + "]";
     }
 }

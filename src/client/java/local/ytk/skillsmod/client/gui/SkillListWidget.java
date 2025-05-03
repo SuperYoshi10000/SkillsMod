@@ -8,14 +8,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 
 import java.util.List;
 
-public class SkillListWidget extends ElementListWidget<SkillListWidget.SkillListWidgetEntry> {
+public class SkillListWidget extends ElementListWidget<SkillListWidget.Entry> {
     public static final int HEADER_HEIGHT = 24;
     private final PlayerEntity player;
     private final SkillList playerSkillList;
@@ -30,16 +29,16 @@ public class SkillListWidget extends ElementListWidget<SkillListWidget.SkillList
             Text skillName = Text.translatable(id.toTranslationKey("skill"));
             SkillInstance skillInstance = playerSkillList.skills().computeIfAbsent(skill, SkillInstance::new);
             SkillWidget skillWidget = new SkillWidget(width, itemHeight, skillInstance, screen);
-            addEntry(new SkillListWidgetEntry(skillWidget));
+            addEntry(new Entry(skillWidget));
         });
     }
     
     
     
-    public static class SkillListWidgetEntry extends ElementListWidget.Entry<SkillListWidgetEntry> {
+    public static class Entry extends ElementListWidget.Entry<Entry> {
         final SkillWidget skillWidget;
         final List<SkillWidget> skillWidgetList;
-        public SkillListWidgetEntry(SkillWidget skillWidget) {
+        public Entry(SkillWidget skillWidget) {
             this.skillWidget = skillWidget;
             this.skillWidgetList = List.of(skillWidget);
         }

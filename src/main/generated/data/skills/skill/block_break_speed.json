@@ -7,11 +7,11 @@
         "attribute": "minecraft:block_break_speed",
         "id": "skills:upgrade/block_break_speed",
         "operation": "add_multiplied_base",
-        "value": 0.02
+        "value": 0.1
       }
     ],
-    "xp": 20
+    "xp": 30
   },
   "icon": "minecraft:mob_effect/haste",
-  "max_level": 100
+  "max_level": 40
 }

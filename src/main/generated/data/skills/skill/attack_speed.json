@@ -7,11 +7,11 @@
         "attribute": "minecraft:attack_speed",
         "id": "skills:upgrade/attack_speed",
         "operation": "add_multiplied_base",
-        "value": 0.01
+        "value": 0.1
       }
     ],
-    "xp": 20
+    "xp": 40
   },
   "icon": "skills:skill/attack_speed",
-  "max_level": 100
+  "max_level": 40
 }

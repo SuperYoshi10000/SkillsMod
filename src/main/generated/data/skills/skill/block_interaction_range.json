@@ -7,11 +7,11 @@
         "attribute": "minecraft:block_interaction_range",
         "id": "skills:upgrade/block_interaction_range",
         "operation": "add_value",
-        "value": 0.025
+        "value": 0.1
       }
     ],
-    "xp": 20
+    "xp": 25
   },
   "icon": "skills:skill/block_interaction",
-  "max_level": 100
+  "max_level": 50
 }

@@ -1,5 +1,6 @@
 package local.ytk.skillsmod.client.gui;
 
+import local.ytk.skillsmod.client.SkillsModClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -10,6 +11,7 @@ public class SkillsScreen extends Screen {
     
     protected SkillsScreen() {
         super(Text.translatable("gui.skills.title"));
+        SkillsModClient.syncSkills();
     }
     
     public static SkillsScreen open() {

@@ -75,7 +75,7 @@ public class SkillCommand {
 //                    PlayerEntity player = (PlayerEntity) context.getSource().getEntity();
 //                    assert player != null;
 //                    SkillList skillList = ((HasSkills) player).getSkills();
-//                    String s = skillList.skills().values().stream().map(v -> v.skill.id + ": " + v.level + ", " + v.xp).reduce("", String::concat);
+//                    String s = skillList.skillList().values().stream().map(v -> v.skill.id + ": " + v.level + ", " + v.xp).reduce("", String::concat);
 //                    context.getSource().sendFeedback(() -> Text.literal(s), false);
 //                    return 1;
 //                }))
@@ -92,7 +92,7 @@ public class SkillCommand {
     }
     
     static int listAllSkills(CommandContext<ServerCommandSource> context) {
-        // List all skillList
+        // List all skills
         Text message = SkillManager.getSkills().stream()
                 .map(skill -> Text.translatable("commands.skill.item.all",
                         Text.translatable(skill.key),
@@ -103,7 +103,7 @@ public class SkillCommand {
         return SUCCESS;
     }
     static int listSkillsForPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        // List all skillList for a player
+        // List all skills for a player
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
         SkillList skillList = ((HasSkills) player).getSkills();
         Text items = skillList.skills().values().stream()
@@ -255,7 +255,7 @@ public class SkillCommand {
             System.out.println("Getting suggestions for skill command"); // debug
             // Provide suggestions for skills
             SkillManager.getSkills().stream()
-                    .filter(skill -> skill.key.equals(builder.getRemaining()))
+                    .filter(skill -> skill.key.endsWith(builder.getRemaining()))
                     .peek(System.out::println) // debug
                     .forEach(skill -> builder.suggest(skill.key));
             System.out.println("Suggestions completed"); // debug

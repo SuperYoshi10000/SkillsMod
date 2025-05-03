@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+@Deprecated(forRemoval = true)
 public class DataRequestManager<P extends PlayerEntity> {
     final BiConsumer<P, RequestDataPayload> sendFunction;
     final Map<String, Request<?>> DATA_REQUESTS = new HashMap<>();

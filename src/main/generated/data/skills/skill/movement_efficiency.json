@@ -7,11 +7,11 @@
         "attribute": "minecraft:movement_efficiency",
         "id": "skills:upgrade/movement_efficiency",
         "operation": "add_value",
-        "value": 0.009
+        "value": 0.02
       }
     ],
-    "xp": 20
+    "xp": 35
   },
   "icon": "skills:skill/movement_efficiency",
-  "max_level": 100
+  "max_level": 50
 }

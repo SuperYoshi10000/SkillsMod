@@ -7,11 +7,11 @@
         "attribute": "minecraft:step_height",
         "id": "skills:upgrade/step_height",
         "operation": "add_value",
-        "value": 0.01
+        "value": 0.03125
       }
     ],
-    "xp": 20
+    "xp": 50
   },
   "icon": "skills:skill/step_height",
-  "max_level": 100
+  "max_level": 24
 }

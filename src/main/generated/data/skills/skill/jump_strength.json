@@ -7,11 +7,11 @@
         "attribute": "minecraft:jump_strength",
         "id": "skills:upgrade/jump_strength",
         "operation": "add_multiplied_base",
-        "value": 0.005
+        "value": 0.01
       }
     ],
-    "xp": 10
+    "xp": 15
   },
   "icon": "minecraft:mob_effect/jump_boost",
-  "max_level": 100
+  "max_level": 50
 }

@@ -32,7 +32,8 @@ public record SkillList(Map<Skill, SkillInstance> skills) {
     }
     
     public static SkillList fromNbt(NbtCompound nbt) {
-        SkillList skillList = SkillManager.createSkillList();
+        SkillList skillList = SkillManager.createEmptySkillList();
+        if (nbt == null) return skillList;
         for (String key : nbt.getKeys()) {
             Skill skill = SkillManager.getSkill(Identifier.of(key));
             if (skill == null) continue;
@@ -50,5 +51,15 @@ public record SkillList(Map<Skill, SkillInstance> skills) {
             nbt.put(entry.getKey().id().toString(), entry.getValue().toNbt());
         }
         return nbt;
+    }
+    
+    public SkillInstance put(SkillInstance instance) {
+        return skills.put(instance.skill, instance);
+    }
+    public void putAll(SkillList skillList) {
+        skills.putAll(skillList.skills);
+    }
+    public SkillInstance get(Skill skill) {
+        return skills.get(skill);
     }
 }

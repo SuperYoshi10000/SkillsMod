@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,8 +27,13 @@ public class Skill {
             Codec.INT.fieldOf("max_level").forGetter(Skill::maxLevel),
             Codec.either(Level.CODEC, Level.CODEC.listOf()).fieldOf("levels").forGetter(s -> Either.right(s.levels())),
             Codec.BOOL.optionalFieldOf("stack_lower_levels", false).forGetter(Skill::stackLowerLevels),
-            Codec.INT_STREAM.optionalFieldOf("xp_required").xmap(s -> s.map(IntStream::toArray).map(IntList::of).orElse(IntList.of()), l -> Optional.ofNullable(l).map(IntCollection::intStream)).forGetter(Skill::xpRequired),
-            Identifier.CODEC.optionalFieldOf("icon", Identifier.ofVanilla("empty")).forGetter(s -> s.id)
+            Codec.INT_STREAM.optionalFieldOf("xp_required").xmap(
+                    s -> s.map(IntStream::toArray).map(IntList::of).orElse(IntList.of()),
+                    l -> Optional.ofNullable(l).map(IntCollection::intStream)
+            ).forGetter(Skill::xpRequired),
+            LinkedEntityAttributeModifier.CODEC.listOf().optionalFieldOf("bonus_modifiers", List.of()).forGetter(Skill::bonusModifiers),
+            StatusEffectInstance.CODEC.listOf().optionalFieldOf("bonus_effects", List.of()).forGetter(Skill::bonusEffects),
+            Identifier.CODEC.optionalFieldOf("icon", Identifier.ofVanilla("empty")).forGetter(Skill::iconId)
     ).apply(instance, Skill::new));
     public static final Codec<Skill> ID_CODEC = Identifier.CODEC.xmap(SkillManager::getSkill, Skill::id);
     
@@ -46,15 +52,29 @@ public class Skill {
     // XP required for each level, if not provided, defaults to 0, 100, 200, ...
     // Only used when using 'allLevels'
     public final IntList xpRequired;
+    public final List<LinkedEntityAttributeModifier> bonusModifiers;
+    public final List<StatusEffectInstance> bonusEffects;
     @Nullable
     public final Identifier iconId;
     
-    public Skill(Identifier id, int base, int maxLevel, Either<Level, List<Level>> levels, boolean stackLowerLevels, @Nullable IntList xpRequired, @Nullable Identifier iconId) {
+    public Skill(
+            Identifier id,
+            int base,
+            int maxLevel,
+            Either<Level, List<Level>> levels,
+            boolean stackLowerLevels,
+            @Nullable IntList xpRequired,
+            List<LinkedEntityAttributeModifier> bonusModifiers,
+            List<StatusEffectInstance> bonusEffects,
+            @Nullable Identifier iconId
+    ) {
         this.id = id;
         this.key = id.toTranslationKey("skill");
 //        this.attribute = attribute;
         this.base = base;
         this.maxLevel = maxLevel;
+        this.bonusModifiers = bonusModifiers;
+        this.bonusEffects = bonusEffects;
         this.iconId = iconId;
         if (levels.left().isPresent()) {
             Level level = levels.left().get();
@@ -72,18 +92,7 @@ public class Skill {
             throw new IllegalArgumentException("Either a single level or a list of levels must be provided");
         }
     }
-    public Skill(Identifier id, int base, int maxLevel, List<Level> levels, boolean stackLowerLevels, @Nullable Identifier iconId) {
-        this.id = id;
-        this.key = id.toTranslationKey("skill");
-//        this.attribute = attribute;
-        this.base = base;
-        this.maxLevel = maxLevel;
-        this.levels = levels;
-        this.allLevels = null;
-        this.stackLowerLevels = stackLowerLevels;
-        this.xpRequired = null;
-        this.iconId = iconId;
-    }
+    
     @SuppressWarnings("all")
     public Skill(Identifier id, int base, int maxLevel, Level allLevels, IntList xpRequired, @Nullable Identifier iconId) {
         this.id = id;
@@ -94,6 +103,8 @@ public class Skill {
         this.allLevels = allLevels;
         this.stackLowerLevels = true;
         this.xpRequired = xpRequired;
+        this.bonusModifiers = allLevels.modifiers;
+        this.bonusEffects = allLevels.effects;
         this.iconId = iconId;
     }
     
@@ -139,6 +150,9 @@ public class Skill {
     public SkillInstance createInstance() {
         return new SkillInstance(this);
     }
+    public SkillInstance createInstance(int level, int xp) {
+        return new SkillInstance(this, level, xp);
+    }
     
     public Identifier id() {
         return id;
@@ -156,8 +170,17 @@ public class Skill {
     public boolean stackLowerLevels() {
         return stackLowerLevels;
     }
+    public List<LinkedEntityAttributeModifier> bonusModifiers() {
+        return bonusModifiers;
+    }
+    public List<StatusEffectInstance> bonusEffects() {
+        return bonusEffects;
+    }
     public IntList xpRequired() {
         return xpRequired;
+    }
+    public @Nullable Identifier iconId() {
+        return iconId;
     }
     
     public int xpRequired(int level) {
@@ -171,7 +194,7 @@ public class Skill {
             return xpRequired.getInt(level - 1);
         }
     }
-    public List<LinkedEntityAttributeModifier> getModifiers(int level) {
+    public List<LinkedEntityAttributeModifier> getRawModifiers(int level) {
         if (level < 0) throw new IllegalArgumentException("Level must be at least 1");
         if (level == 0) return List.of();
         if (level > maxLevel) level = maxLevel;
@@ -183,18 +206,35 @@ public class Skill {
             return levels.get(level - 1).modifiers;
         }
     }
-    public List<LinkedEntityAttributeModifier> getOptimizedModifiers(int level) {
-        if (level < 0) throw new IllegalArgumentException("Level must be at least 1");
+    public List<LinkedEntityAttributeModifier> getModifiers(int level) {
+        if (level < 0) throw new IllegalArgumentException("Level must be at least 0");
         if (level == 0) return List.of();
+        List<LinkedEntityAttributeModifier> modifiers;
         if (allLevels != null) {
-            return allLevels.modifiers.stream().map(m -> new LinkedEntityAttributeModifier(m.attribute(), m.id(), m.value() * level, m.operation())).toList();
+            modifiers = allLevels.modifiers.stream().map(m -> new LinkedEntityAttributeModifier(m.attribute(), m.id(), m.value() * level, m.operation())).toList();
         } else if (stackLowerLevels) {
             Multimap<EntityAttribute, LinkedEntityAttributeModifier> map = HashMultimap.create();
             levels.subList(0, Math.min(level, maxLevel)).forEach(l -> l.modifiers.forEach(m -> map.put(m.attribute(), m)));
-            return map.asMap().entrySet().stream().flatMap(Skill::mergeSimilar).toList();
+            modifiers = map.asMap().entrySet().stream().flatMap(Skill::mergeSimilar).toList();
         } else {
-            return levels.get(Math.min(level, maxLevel) - 1).modifiers; // No optimization needed
+            modifiers = levels.get(Math.min(level, maxLevel) - 1).modifiers; // No optimization needed
         }
+        if (level >= maxLevel) modifiers.addAll(bonusModifiers);
+        return modifiers;
+    }
+    public List<StatusEffectInstance> getEffects(int level) {
+        if (level < 0) throw new IllegalArgumentException("Level must be at least 1");
+        if (level == 0) return List.of();
+        List<StatusEffectInstance> effects;
+        if (allLevels != null) {
+            effects = allLevels.effects.stream().map(e -> new StatusEffectInstance(e.getEffectType(), e.getDuration(), e.getAmplifier() + level - 1, e.isAmbient(), e.shouldShowParticles())).toList();
+        } else if (stackLowerLevels) {
+            effects = levels.subList(0, Math.min(level, maxLevel)).stream().flatMap(l -> l.effects.stream()).toList();
+        } else {
+            effects = levels.get(Math.min(level, maxLevel) - 1).effects;
+        }
+        if (level >= maxLevel) effects.addAll(bonusEffects);
+        return effects;
     }
     
     @Override
@@ -226,15 +266,16 @@ public class Skill {
                 "stackLowerLevels=" + stackLowerLevels +']';
     }
     
-    public record Level(int xpRequired, List<LinkedEntityAttributeModifier> modifiers) {
+    public record Level(int xpRequired, List<LinkedEntityAttributeModifier> modifiers, List<StatusEffectInstance> effects) {
         public static final Codec<Level> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.INT.fieldOf("xp").forGetter(Level::xpRequired),
-                LinkedEntityAttributeModifier.CODEC.listOf().fieldOf("modifiers").forGetter(Level::modifiers)
+                LinkedEntityAttributeModifier.CODEC.listOf().optionalFieldOf("modifiers", List.of()).forGetter(Level::modifiers),
+                StatusEffectInstance.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(Level::effects)
         ).apply(instance, Level::new));
         
         @Override
         public String toString() {
-            return xpRequired + ": " + modifiers;
+            return xpRequired + ": " + modifiers + "; " + effects;
         }
         @Override
         public boolean equals(Object obj) {
@@ -246,7 +287,7 @@ public class Skill {
         }
         @Override
         public int hashCode() {
-            return Objects.hash(xpRequired, modifiers);
+            return Objects.hash(xpRequired, modifiers, effects);
         }
     }
 }

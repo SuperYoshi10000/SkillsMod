@@ -1,6 +1,5 @@
 package local.ytk.skillsmod.client.gui;
 
-import local.ytk.skillsmod.client.SkillSpriteManager;
 import local.ytk.skillsmod.client.SkillsModClient;
 import local.ytk.skillsmod.client.screen.HasSkillSpriteManager;
 import local.ytk.skillsmod.skills.*;
@@ -14,9 +13,7 @@ import net.minecraft.client.texture.StatusEffectSpriteManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 
 import java.util.List;
 
@@ -55,8 +52,6 @@ public class SkillWidget extends ButtonWidget {
         // Handle skill button press
         PlayerEntity player = MinecraftClient.getInstance().player;
         if (player == null) return; // Should never happen, but just in case
-        SkillList skills = ((HasSkills) player).getSkills();
-        if (skills == null) skills = SkillManager.createSkillList();
         SkillInstance skillInstance = ((SkillWidget) button).skillInstance;
         
         int level = skillInstance.level;
@@ -67,10 +62,8 @@ public class SkillWidget extends ButtonWidget {
         if (level >= maxLevel) return; // Already maxed out
         if (playerXp < xpRequired) return; // Not enough XP
         // Level up the skill
-        skillInstance.addXp(xpRequired, player);
-        
-        skills.skills().put(skillInstance.skill, skillInstance);
-        ((HasSkills) player).setSkills(skills); // Update the player's skills on both client and server
+        skillInstance.spendXp(xpRequired, player);
+        SkillsModClient.updateSkills(skillInstance);
     }
     
     @Override
@@ -96,7 +89,7 @@ public class SkillWidget extends ButtonWidget {
         context.drawTextWithShadow(screen.getTextRenderer(), levelText, textX, bottomLineY, TEXT_ALT_COLOR);
         context.drawSpriteStretched(RenderLayer::getGuiTextured, getSkillIcon(skillInstance.skill), imageX, topLineY, ICON_SIZE, ICON_SIZE);
         
-        List<LinkedEntityAttributeModifier> modifiers = skillInstance.skill.getOptimizedModifiers(currentLevel);
+        List<LinkedEntityAttributeModifier> modifiers = skillInstance.skill.getModifiers(currentLevel);
         Text tooltipText = modifiers.stream()
                 .map(SkillWidget::formatModifier)
                 .reduce(Text.empty(), MutableText::append, MutableText::append);

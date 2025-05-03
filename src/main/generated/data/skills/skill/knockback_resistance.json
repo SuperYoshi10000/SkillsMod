@@ -7,11 +7,11 @@
         "attribute": "minecraft:knockback_resistance",
         "id": "skills:upgrade/knockback_resistance",
         "operation": "add_value",
-        "value": 0.009
+        "value": 0.02
       }
     ],
-    "xp": 20
+    "xp": 50
   },
   "icon": "skills:skill/knockback_resistance",
-  "max_level": 100
+  "max_level": 50
 }

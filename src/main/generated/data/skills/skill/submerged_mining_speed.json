@@ -10,8 +10,8 @@
         "value": 0.04
       }
     ],
-    "xp": 20
+    "xp": 40
   },
   "icon": "minecraft:mob_effect/conduit_power",
-  "max_level": 100
+  "max_level": 25
 }

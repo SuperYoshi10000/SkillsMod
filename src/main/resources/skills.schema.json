@@ -5,54 +5,68 @@
   "type": "object",
   "properties": {
     "id": { "type": "string" },
-    "base": { "type": "number" },
+    "base": { "type": ["number", "null"] },
     "max_level": { "type": "number" },
     "levels": {
       "oneOf": [{
-        "type": "object",
-        "properties": {
-          "xp": { "type": "number" },
-          "modifiers": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "attribute": { "type": "string" },
-                "id": { "type": "string" },
-                "operation": { "enum": ["add_value", "add_multiplied_base", "add_multiplied_total"] },
-                "value": { "type": "number" }
-              },
-              "required": ["attribute", "id", "operation", "value"]
-            }
-          }
-        }
+        "$ref": "#/definitions/level"
       }, {
         "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "xp": { "type": "number" },
-            "modifiers": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "attribute": { "type": "string" },
-                  "id": { "type": "string" },
-                  "operation": { "enum": ["add_value", "add_multiplied_base", "add_multiplied_total"] },
-                  "value": { "type": "number" }
-                },
-                "required": ["attribute", "id", "operation", "value"]
-              }
-            }
-          }
-        }
+        "items": { "$ref": "#/definitions/level" }
       }]
     },
     "stack_lower_levels": { "type": "boolean" },
     "xp_required": { "type": "array", "items": { "type": "number" } },
+    "bonus_modifiers": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/modifier" }
+    },
+    "bonus_effects": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/effect" }
+    },
     "icon": { "type": "string", "pattern": "([a-z0-9._-]*:)?[a-z0-9/._-]*" },
     "enabled": { "type": "boolean" }
   },
-  "required": ["id", "base", "max_level", "levels"]
+  "required": ["id", "base", "max_level", "levels"],
+  "definitions": {
+    "level": {
+      "type": "object",
+      "properties": {
+        "xp": { "type": "integer" },
+        "modifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/modifier"
+          }
+        },
+        "effects": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/effect" }
+        }
+      }
+    },
+    "modifier": {
+      "type": "object",
+      "properties": {
+        "attribute": { "type": "string" },
+        "id": { "type": "string" },
+        "operation": { "enum": ["add_value", "add_multiplied_base", "add_multiplied_total"] },
+        "value": { "type": "number" }
+      },
+      "required": ["attribute", "id", "operation", "value"]
+    },
+    "effect": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "duration": { "type": "number" },
+        "amplifier": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "ambient": { "type": "boolean" },
+        "show_particles": { "type": "boolean" },
+        "show_icon": { "type": "boolean" },
+        "hidden_effect": { "$ref": "#/definitions/effect" }
+      }
+    }
+  }
 }

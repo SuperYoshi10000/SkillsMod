@@ -10,8 +10,8 @@
         "value": 1
       }
     ],
-    "xp": 20
+    "xp": 10
   },
   "icon": "minecraft:mob_effect/water_breathing",
-  "max_level": 100
+  "max_level": 33
 }

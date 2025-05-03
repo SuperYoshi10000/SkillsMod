@@ -22,7 +22,7 @@ public class SkillData extends PersistentState {
     public final HashMap<UUID, PlayerSkillData> players = new HashMap<>();
     
     public SkillList getPlayerSkills(UUID uuid) {
-        return players.computeIfAbsent(uuid, PlayerSkillData::new).skills;
+        return players.computeIfAbsent(uuid, PlayerSkillData::new).skillList;
     }
     
     public NbtCompound writeNbt(NbtCompound nbt) {
@@ -30,6 +30,7 @@ public class SkillData extends PersistentState {
         for (UUID uuid : players.keySet()) {
             NbtCompound playerTag = new NbtCompound();
             playerTag.put("skills", getPlayerSkills(uuid).toNbt());
+            System.out.println("Writing skills: " + playerTag);
             skillTag.put(uuid == null ? "PLAYER" : uuid.toString(), playerTag);
         }
         nbt.put("players", skillTag);
@@ -60,29 +61,35 @@ public class SkillData extends PersistentState {
     }
     public static PlayerSkillData getPlayerState(PlayerEntity player) {
         assert player != null;
-        if (player.getServer() == null) {
+        MinecraftServer server = player.getServer();
+        if (server == null) {
             // Client side
             return new PlayerSkillData(player.getUuid());
         }
-        SkillData state = getServerState(player.getServer());
-        boolean isSinglePlayerMainPlayer = false; // todo figure this out
-        return state.players.computeIfAbsent(!isSinglePlayerMainPlayer ? player.getUuid() : null, PlayerSkillData::new);
+        SkillData state = getServerState(server);
+        boolean isSingleplayer = server.isSingleplayer();
+        return state.players.computeIfAbsent(!isSingleplayer ? player.getUuid() : null, uuid -> new PlayerSkillData(player));
     }
     
     public static void savePlayerState(PlayerEntity player) {
-        if (player.getServer() == null) return; // Client side
-        SkillData state = getServerState(player.getServer());
-        PlayerSkillData playerState = state.players.get(player.getUuid());
-        if (playerState == null) return; // No player state
-        ServerWorld world = player.getServer().getWorld(World.OVERWORLD);
+        MinecraftServer server = player.getServer();
+        if (player.getWorld().isClient || server == null) return; // Client side
+        SkillData state = getServerState(server);
+        PlayerSkillData playerState = getPlayerState(player);
+        ServerWorld world = server.getWorld(World.OVERWORLD);
         assert world != null;
+        state.players.put(player.getUuid(), playerState);
         world.getPersistentStateManager().set(TYPE, state);
         state.markDirty();
     }
     
-    public record PlayerSkillData(SkillList skills) {
+    public record PlayerSkillData(SkillList skillList) {
         public PlayerSkillData(UUID uuid) {
-            this(SkillManager.createSkillList());
+            this(SkillManager.createEmptySkillList());
+        }
+        public PlayerSkillData(PlayerEntity player) {
+            this(SkillManager.createEmptySkillList());
+            skillList.putAll(SkillManager.getSkills(player));
         }
     }
 }

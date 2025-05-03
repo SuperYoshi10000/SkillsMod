@@ -7,11 +7,11 @@
         "attribute": "minecraft:movement_speed",
         "id": "skills:upgrade/movement_speed",
         "operation": "add_multiplied_base",
-        "value": 0.015
+        "value": 0.02
       }
     ],
-    "xp": 20
+    "xp": 35
   },
   "icon": "minecraft:mob_effect/speed",
-  "max_level": 100
+  "max_level": 50
 }

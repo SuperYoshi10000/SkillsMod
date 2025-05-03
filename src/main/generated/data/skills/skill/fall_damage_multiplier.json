@@ -7,11 +7,11 @@
         "attribute": "minecraft:fall_damage_multiplier",
         "id": "skills:upgrade/fall_damage_multiplier",
         "operation": "add_value",
-        "value": -0.008
+        "value": -0.01
       }
     ],
     "xp": 20
   },
   "icon": "minecraft:mob_effect/slow_falling",
-  "max_level": 100
+  "max_level": 80
 }

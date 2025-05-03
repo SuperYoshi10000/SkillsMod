@@ -1,0 +1,13 @@
+{
+  "id": "skills:night_vision",
+  "levels": [],
+  "bonus_effects": [{
+    "id": "minecraft:night_vision",
+    "duration": -1,
+    "amplifier": 0
+  }],
+  "max_level": 1,
+  "icon": "minecraft:mob_effect/night_vision",
+  "base": null,
+  "enabled": false
+}

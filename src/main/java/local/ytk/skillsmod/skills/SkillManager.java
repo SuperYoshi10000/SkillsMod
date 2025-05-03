@@ -9,10 +9,13 @@ import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.ints.IntList;
 import local.ytk.skillsmod.SkillsMod;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resource.LifecycledResourceManager;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +46,43 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
                 .map(SkillInstance::new)
                 .collect(Collectors.toMap(SkillInstance::getSkill, v -> v)));
     }
+    public static SkillList createEmptySkillList() {
+        return new SkillList(new HashMap<>());
+    }
     
     public static SkillInstance createInstance(Identifier id) {
         return INSTANCE.skills.computeIfAbsent(id, s -> {
             LOGGER.error("Skill not found: {}", id);
-            return new Skill(id, 0, 100, new Skill.Level(100, List.of()), IntList.of(), id);
+            return new Skill(id, 0, 100, new Skill.Level(100, List.of(), List.of()), IntList.of(), id);
         }).createInstance();
+    }
+    public static SkillInstance createInstance(Identifier id, int level, int xp) {
+        return INSTANCE.skills.computeIfAbsent(id, s -> {
+            LOGGER.error("Skill not found: {} (level {}, {}xp)", id, level, xp);
+            return new Skill(id, 0, 100, new Skill.Level(100, List.of(), List.of()), IntList.of(), id);
+        }).createInstance(level, xp);
+    }
+    
+    public static SkillList getSkills(PlayerEntity player) {
+        if (player.getDataTracker() == null) return SkillData.getPlayerState(player).skillList();
+        return ((HasSkills) player).getSkills();
+        
+    }
+    public static void setSkills(PlayerEntity player, SkillList skills) {
+        ((HasSkills) player).setSkills(skills);
+        if (player.getWorld().isClient) return;
+        MinecraftServer server = player.getServer();
+        assert server != null;
+        server.getWorld(World.OVERWORLD);
+        SkillData.savePlayerState(player);
+    }
+    public static void updateSkills(PlayerEntity player, SkillList skills) {
+        ((HasSkills) player).updateSkills(skills);
+        if (player.getWorld().isClient) return;
+        MinecraftServer server = player.getServer();
+        assert server != null;
+        server.getWorld(World.OVERWORLD);
+        SkillData.savePlayerState(player);
     }
     
     @Override
@@ -79,9 +113,5 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
                 LOGGER.error("e: ", e);
             }
         }
-    }
-    
-    public void loadSkills(LifecycledResourceManager manager) {
-//        resourceManager.findAllResources("skills")
     }
 }
