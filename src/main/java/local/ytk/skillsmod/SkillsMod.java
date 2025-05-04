@@ -1,8 +1,9 @@
 package local.ytk.skillsmod;
 
 import local.ytk.skillsmod.command.SkillCommand;
-import local.ytk.skillsmod.network.SkillListPayload;
 import local.ytk.skillsmod.network.SkillListSyncPayload;
+import local.ytk.skillsmod.network.SkillUpdatePayload;
+import local.ytk.skillsmod.skills.SkillData;
 import local.ytk.skillsmod.skills.SkillInstance;
 import local.ytk.skillsmod.skills.SkillList;
 import local.ytk.skillsmod.skills.SkillManager;
@@ -40,13 +41,13 @@ public class SkillsMod implements ModInitializer {
         ServerLivingEntityEvents.AFTER_DEATH.register(SkillsMod::afterDeath);
         ServerPlayerEvents.AFTER_RESPAWN.register(SkillsMod::playerRespawn);
         
-        PayloadTypeRegistry.playS2C().register(SkillListPayload.PAYLOAD_ID, SkillListPayload.PACKET_CODEC);
-        PayloadTypeRegistry.playC2S().register(SkillListPayload.PAYLOAD_ID, SkillListPayload.PACKET_CODEC);
-        ServerPlayNetworking.registerGlobalReceiver(SkillListPayload.PAYLOAD_ID, this::handleSkillList);
+        PayloadTypeRegistry.playS2C().register(SkillListSyncPayload.PAYLOAD_ID, SkillListSyncPayload.PACKET_CODEC);
+        PayloadTypeRegistry.playC2S().register(SkillUpdatePayload.PAYLOAD_ID, SkillUpdatePayload.PACKET_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(SkillUpdatePayload.PAYLOAD_ID, this::handleSkillUpdate);
     }
     
     private static void playerJoin(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server) {
-        syncSkills(handler.player);
+        syncSkills(handler.player, handler.player, SkillManager.getSkills(handler.player));
     }
     private static void afterDeath(LivingEntity entity, DamageSource damageSource) {
         if (entity instanceof ServerPlayerEntity player)
@@ -57,40 +58,22 @@ public class SkillsMod implements ModInitializer {
         syncSkills(newPlayer.server, newPlayer, SkillManager.getSkills(newPlayer));
     }
     
-    private void handleSkillList(SkillListPayload payload, ServerPlayNetworking.Context context) {
-        SkillList skillList = payload.skillList();
+    private void handleSkillUpdate(SkillUpdatePayload payload, ServerPlayNetworking.Context context) {
         ServerPlayerEntity player = context.player();
-        switch (payload.type()) {
-            case REQUEST -> ServerPlayNetworking.send(player, SkillListPayload.response(SkillManager.getSkills(player)));
-            case MODIFY -> {
-                // Only allowed to upgrade one skill at a time - this is to prevent cheating
-                if (skillList.skills().size() != 1) {
-                    ServerPlayNetworking.send(player, SkillListPayload.rejection(payload.skillList()));
-                    return;
-                }
-                SkillInstance skillInstance = skillList.skills().values().iterator().next();
-                SkillList playerSkillList = SkillManager.getSkills(player);
-                SkillInstance playerSkillInstance = playerSkillList.skills().get(skillInstance.getSkill());
-                if (skillInstance.level - playerSkillInstance.level != 1) {
-                    ServerPlayNetworking.send(player, SkillListPayload.rejection(payload.skillList()));
-                    return;
-                } // upgrading by one level
-                int neededXp = skillInstance.getXpToNextLevel();
-                if (player.totalExperience < neededXp) {
-                    ServerPlayNetworking.send(player, SkillListPayload.rejection(payload.skillList()));
-                    return;
-                } // enough xp
-                playerSkillInstance.spendXp(neededXp, player);
-                ServerPlayNetworking.send(player, SkillListPayload.confirmation(playerSkillList));
-                SkillManager.updateSkills(player, playerSkillList);
-                
-                if (skillInstance.skill.id.equals(id("max_health"))) {
-                    // heal player
-                    // this is a special case, because upgrading the max health skill gives you more health
-                    player.heal(1.0f);
-                }
-            }
-            // client should not try to do anything else
+        SkillData.PlayerSkillData playerState = SkillData.getPlayerState(player);
+        SkillList playerSkillList = playerState.skillList();
+        SkillInstance newSkillInstance = payload.skillInstance();
+        SkillInstance playerSkillInstance = playerSkillList.get(newSkillInstance.skill);
+        if (payload.addLevels() > 1) return; // Prevent cheating
+        if (payload.addLevels() > 0) {
+            playerSkillInstance.addLevels(payload.addLevels(), player);
+        }
+        if (payload.addXp() > 0) {
+            playerSkillInstance.addXp(payload.addXp(), player);
+        }
+        if (payload.addLevels() > 0 || payload.addXp() > 0) {
+            playerSkillList.replace(playerSkillInstance, newSkillInstance);
+            syncSkills(player.server, player, playerSkillList);
         }
     }
     

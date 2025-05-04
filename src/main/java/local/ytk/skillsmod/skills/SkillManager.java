@@ -9,13 +9,11 @@ import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.ints.IntList;
 import local.ytk.skillsmod.SkillsMod;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.resource.LifecycledResourceManager;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,25 +62,19 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
     }
     
     public static SkillList getSkills(PlayerEntity player) {
-        if (player.getDataTracker() == null) return SkillData.getPlayerState(player).skillList();
-        return ((HasSkills) player).getSkills();
-        
-    }
-    public static void setSkills(PlayerEntity player, SkillList skills) {
-        ((HasSkills) player).setSkills(skills);
-        if (player.getWorld().isClient) return;
-        MinecraftServer server = player.getServer();
-        assert server != null;
-        server.getWorld(World.OVERWORLD);
-        SkillData.savePlayerState(player);
+        return SkillData.getPlayerState(player).skillList();
     }
     public static void updateSkills(PlayerEntity player, SkillList skills) {
-        ((HasSkills) player).updateSkills(skills);
-        if (player.getWorld().isClient) return;
-        MinecraftServer server = player.getServer();
-        assert server != null;
-        server.getWorld(World.OVERWORLD);
-        SkillData.savePlayerState(player);
+        // Add attributes for skills
+        if (skills == null) skills = getSkills(player);
+        for (SkillInstance skill : skills.skills().values()) {
+            if (skill.level == 0) continue; // No need to add attributes for level 0
+            for (LinkedEntityAttributeModifier modifier : skill.skill.getModifiers(Math.min(skill.level, skill.skill.maxLevel))) {
+                EntityAttributeInstance attributeInstance = player.getAttributeInstance(modifier.attributeEntry());
+                if (attributeInstance == null) attributeInstance = new EntityAttributeInstance(modifier.attributeEntry(), a -> {});
+                attributeInstance.overwritePersistentModifier(modifier.toEntityAttributeModifier());
+            }
+        }
     }
     
     @Override

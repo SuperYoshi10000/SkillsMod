@@ -8,24 +8,20 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import local.ytk.skillsmod.SkillsMod;
 import local.ytk.skillsmod.skills.*;
-import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.predicate.NumberRange;
-import net.minecraft.server.command.DataCommand;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.ParsedSelector;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -74,7 +70,7 @@ public class SkillCommand {
 //                .then(literal("test_list_skills").executes(context -> {
 //                    PlayerEntity player = (PlayerEntity) context.getSource().getEntity();
 //                    assert player != null;
-//                    SkillList skillList = ((HasSkills) player).getSkills();
+//                    SkillList skillList = SkillManager.getSkills(player);
 //                    String s = skillList.skillList().values().stream().map(v -> v.skill.id + ": " + v.level + ", " + v.xp).reduce("", String::concat);
 //                    context.getSource().sendFeedback(() -> Text.literal(s), false);
 //                    return 1;
@@ -105,7 +101,7 @@ public class SkillCommand {
     static int listSkillsForPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         // List all skills for a player
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        SkillList skillList = SkillManager.getSkills(player);
         Text items = skillList.skills().values().stream()
                 .map(s -> Text.translatable("commands.skill.item.player",
                         Text.translatable(s.skill.key),
@@ -120,7 +116,7 @@ public class SkillCommand {
     static int getSkill(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         // Get a skill for a player
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        SkillList skillList = SkillManager.getSkills(player);
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
@@ -138,7 +134,7 @@ public class SkillCommand {
     }
     static int getSkillLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        SkillList skillList = SkillManager.getSkills(player);
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
@@ -155,7 +151,7 @@ public class SkillCommand {
     
     static int getSkillXp(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        SkillList skillList = SkillManager.getSkills(player);
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
@@ -172,7 +168,7 @@ public class SkillCommand {
     static int setSkill(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         // Set a skill for a player
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        SkillList skillList = SkillManager.getSkills(player);
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
@@ -183,13 +179,13 @@ public class SkillCommand {
         int xp = IntegerArgumentType.getInteger(context, "xp");
         skill.setLevel(level);
         skill.setXp(xp);
-        ((HasSkills) player).setSkills(skillList);
+        SkillManager.updateSkills(player, skillList);
         return SUCCESS;
     }
     static int setSkillLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         // Set a skill levels for a player
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        SkillList skillList = SkillManager.getSkills(player);
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
@@ -198,14 +194,14 @@ public class SkillCommand {
         }
         int level = IntegerArgumentType.getInteger(context, "levels");
         skill.setLevel(level);
-        ((HasSkills) player).setSkills(skillList);
+        SkillManager.updateSkills(player, skillList);
         return SUCCESS;
     }
     
     static int setSkillXp(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         // Set a skill xp for a player
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        SkillList skillList = SkillManager.getSkills(player);
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
@@ -214,13 +210,13 @@ public class SkillCommand {
         }
         int xp = IntegerArgumentType.getInteger(context, "xp");
         skill.setXp(xp);
-        ((HasSkills) player).setSkills(skillList);
+        SkillManager.updateSkills(player, skillList);
         return SUCCESS;
     }
     static int addSkillLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         // Add to a skill levels for a player
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        SkillList skillList = SkillManager.getSkills(player);
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
@@ -229,14 +225,14 @@ public class SkillCommand {
         }
         int levels = IntegerArgumentType.getInteger(context, "levels");
         skill.addLevels(levels, player);
-        ((HasSkills) player).setSkills(skillList);
+        SkillManager.updateSkills(player, skillList);
         return SUCCESS;
     }
     
     static int addSkillXp(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         // Add to a skill XP for a player
-        PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-        SkillList skillList = ((HasSkills) player).getSkills();
+        ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
+        SkillList skillList = SkillManager.getSkills(player);
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
@@ -245,7 +241,7 @@ public class SkillCommand {
         }
         int xp = IntegerArgumentType.getInteger(context, "xp");
         skill.addXp(xp, player);
-        ((HasSkills) player).setSkills(skillList);
+        SkillsMod.syncSkills(context.getSource().getServer(), player, skillList);
         return SUCCESS;
     }
     

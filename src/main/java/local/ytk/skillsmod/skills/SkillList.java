@@ -53,6 +53,11 @@ public record SkillList(Map<Skill, SkillInstance> skills) {
         return nbt;
     }
     
+    public SkillInstance replace(SkillInstance oldInstance, SkillInstance newInstance) {
+        if (oldInstance.equals(newInstance)) return newInstance;
+        if (!oldInstance.skill.id.equals(newInstance.skill.id)) return newInstance;
+        return put(newInstance);
+    }
     public SkillInstance put(SkillInstance instance) {
         return skills.put(instance.skill, instance);
     }

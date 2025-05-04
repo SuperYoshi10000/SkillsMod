@@ -71,18 +71,6 @@ public class SkillData extends PersistentState {
         return state.players.computeIfAbsent(!isSingleplayer ? player.getUuid() : null, uuid -> new PlayerSkillData(player));
     }
     
-    public static void savePlayerState(PlayerEntity player) {
-        MinecraftServer server = player.getServer();
-        if (player.getWorld().isClient || server == null) return; // Client side
-        SkillData state = getServerState(server);
-        PlayerSkillData playerState = getPlayerState(player);
-        ServerWorld world = server.getWorld(World.OVERWORLD);
-        assert world != null;
-        state.players.put(player.getUuid(), playerState);
-        world.getPersistentStateManager().set(TYPE, state);
-        state.markDirty();
-    }
-    
     public record PlayerSkillData(SkillList skillList) {
         public PlayerSkillData(UUID uuid) {
             this(SkillManager.createEmptySkillList());

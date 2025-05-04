@@ -23,7 +23,7 @@ public class SkillListWidget extends ElementListWidget<SkillListWidget.Entry> {
         super(minecraftClient, width, height, y, itemHeight, HEADER_HEIGHT);
         player = minecraftClient.player;
         if (player == null) throw new IllegalStateException("Player is null");
-        playerSkillList = ((HasSkills) player).getSkills();
+        playerSkillList = SkillManager.getSkills(player);
         
         SkillManager.INSTANCE.skills.forEach((id, skill) -> {
             Text skillName = Text.translatable(id.toTranslationKey("skill"));
