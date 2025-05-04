@@ -2,6 +2,7 @@ package local.ytk.skillsmod.skills;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.RegistryByteBuf;
@@ -20,6 +21,7 @@ public class SkillInstance {
             Codec.INT.fieldOf("level").forGetter(SkillInstance::getLevel),
             Codec.INT.fieldOf("xp").forGetter(SkillInstance::getXp)
     ).apply(instance, SkillInstance::new));
+    
     public static final PacketCodec<RegistryByteBuf, SkillInstance> PACKET_CODEC = PacketCodec.tuple(
             Identifier.PACKET_CODEC, SkillInstance::getId,
             PacketCodecs.INTEGER, SkillInstance::getLevel,
@@ -119,10 +121,17 @@ public class SkillInstance {
     
     public NbtCompound toNbt() {
         NbtCompound nbt = new NbtCompound();
-        nbt.putString("skill", skill.id.toString());
+        if (skill != null) nbt.putString("skill", skill.id.toString());
         nbt.putInt("level", level);
         nbt.putInt("xp", xp);
         return nbt;
+    }
+    public static SkillInstance fromNbt(NbtCompound nbt) {
+        Identifier id = nbt.getString("skill").map(Identifier::of).orElse(null);
+        Skill skill = SkillManager.getSkill(id);
+        int level = nbt.getInt("level").orElse(0);
+        int xp = nbt.getInt("xp").orElse(0);
+        return new SkillInstance(skill, level, xp);
     }
     
     @Override

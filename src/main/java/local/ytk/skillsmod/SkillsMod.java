@@ -61,20 +61,19 @@ public class SkillsMod implements ModInitializer {
     private void handleSkillUpdate(SkillUpdatePayload payload, ServerPlayNetworking.Context context) {
         ServerPlayerEntity player = context.player();
         SkillData.PlayerSkillData playerState = SkillData.getPlayerState(player);
-        SkillList playerSkillList = playerState.skillList();
-        SkillInstance newSkillInstance = payload.skillInstance();
-        SkillInstance playerSkillInstance = playerSkillList.get(newSkillInstance.skill);
-        if (payload.addLevels() > 1) return; // Prevent cheating
-        if (payload.addLevels() > 0) {
-            playerSkillInstance.addLevels(payload.addLevels(), player);
+        SkillList skillList = playerState.skillList();
+        skillUpdate: {
+            if (payload == SkillUpdatePayload.EMPTY) break skillUpdate; // request skill sync
+            if (payload.addLevels() > 1) break skillUpdate; // Prevent cheating
+            SkillInstance newSkillInstance = payload.skillInstance();
+            SkillInstance playerSkillInstance = skillList.get(newSkillInstance.skill);
+            int xpToNextLevel = playerSkillInstance.getXpToNextLevel();
+            int addXp = payload.addXp();
+            if (player.totalExperience < xpToNextLevel + addXp) break skillUpdate; // Not enough XP
+            if (payload.addLevels() > 0) playerSkillInstance.spendXp(xpToNextLevel, player);
+            if (addXp > 0) playerSkillInstance.spendXp(addXp, player);
         }
-        if (payload.addXp() > 0) {
-            playerSkillInstance.addXp(payload.addXp(), player);
-        }
-        if (payload.addLevels() > 0 || payload.addXp() > 0) {
-            playerSkillList.replace(playerSkillInstance, newSkillInstance);
-            syncSkills(player.server, player, playerSkillList);
-        }
+        syncSkills(player.server, player, skillList);
     }
     
     public static void syncSkills(MinecraftServer server, ServerPlayerEntity target, SkillList skills) {
