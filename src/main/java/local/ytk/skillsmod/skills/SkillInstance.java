@@ -14,6 +14,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 public class SkillInstance {
     // Get skill and player
     public static final Codec<SkillInstance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -126,12 +128,17 @@ public class SkillInstance {
         nbt.putInt("xp", xp);
         return nbt;
     }
+    
     public static SkillInstance fromNbt(NbtCompound nbt) {
         Identifier id = nbt.getString("skill").map(Identifier::of).orElse(null);
         Skill skill = SkillManager.getSkill(id);
         int level = nbt.getInt("level").orElse(0);
         int xp = nbt.getInt("xp").orElse(0);
         return new SkillInstance(skill, level, xp);
+    }
+    
+    public Map.Entry<Skill, SkillInstance> toEntry() {
+        return Map.entry(skill, this);
     }
     
     @Override

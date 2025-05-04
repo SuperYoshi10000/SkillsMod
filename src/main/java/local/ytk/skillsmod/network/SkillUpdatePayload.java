@@ -8,6 +8,8 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
@@ -19,23 +21,32 @@ public record SkillUpdatePayload(SkillInstance skillInstance, int addLevels, int
     public static final PacketCodec<RegistryByteBuf, SkillUpdatePayload> PACKET_CODEC = PacketCodec.ofStatic(
             SkillUpdatePayload::write, SkillUpdatePayload::new
     );
+    private static final Logger LOGGER = LoggerFactory.getLogger(SkillUpdatePayload.class);
     
     public SkillUpdatePayload(RegistryByteBuf buf) {
-        this(SkillInstance.fromNbt(Objects.requireNonNullElseGet(buf.readNbt(), NbtCompound::new)), buf.readInt(), buf.readInt());
-        System.out.println("Reading payload: " + skillInstance.skill.id);
+        this(
+                SkillInstance.fromNbt(Objects.requireNonNullElseGet(buf.readNbt(), NbtCompound::new)), // skillInstance
+                buf.readInt(), // addLevels
+                buf.readInt() // addXp
+        );
+        LOGGER.info("Reading payload{}", skillInstance.skill != null ? ": " + skillInstance.skill.id : "");
     }
     public static void write(RegistryByteBuf buf, SkillUpdatePayload payload) {
         NbtCompound nbt = new NbtCompound();
         SkillInstance skillInstance = payload.skillInstance;
         if (skillInstance != null) buf.writeNbt(skillInstance.toNbt());
         else buf.writeNbt(NbtEnd.INSTANCE);
-        buf.writeByte(payload.addLevels);
-        buf.writeByte(payload.addXp);
-        System.out.println("Writing payload" + (skillInstance != null ? ": " + skillInstance.skill.id : ""));
+        buf.writeInt(payload.addLevels);
+        buf.writeInt(payload.addXp);
+        LOGGER.info("Writing payload{}", skillInstance != null ? ": " + skillInstance.skill.id : "");
     }
     
     @Override
     public Id<? extends CustomPayload> getId() {
         return PAYLOAD_ID;
+    }
+    
+    public boolean isEmpty() {
+        return skillInstance == null || skillInstance.skill == null;
     }
 }

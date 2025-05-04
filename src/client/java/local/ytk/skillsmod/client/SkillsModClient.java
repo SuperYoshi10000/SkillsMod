@@ -6,6 +6,7 @@ import local.ytk.skillsmod.network.SkillUpdatePayload;
 import local.ytk.skillsmod.skills.SkillData;
 import local.ytk.skillsmod.skills.SkillInstance;
 import local.ytk.skillsmod.skills.SkillList;
+import local.ytk.skillsmod.skills.SkillManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -19,11 +20,12 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.lwjgl.glfw.GLFW;
 
 public class SkillsModClient implements ClientModInitializer {
     KeyBinding openSkillsScreenKeyBinding;
-    SkillData.PlayerSkillData playerSkillData;
+    SkillData skillData;
     
 //    DataRequestManager<?> dataRequestManager = new DataRequestManager<>((player, payload) -> ClientPlayNetworking.send(payload));
     
@@ -35,6 +37,7 @@ public class SkillsModClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_U,
                 "category.skills.keybindings"
         ));
+        skillData = new SkillData();
         
 //        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
 //            skillSpriteManager = new SkillSpriteManager(MinecraftClient.getInstance().getTextureManager());
@@ -43,11 +46,10 @@ public class SkillsModClient implements ClientModInitializer {
 //.
         
         ClientPlayConnectionEvents.JOIN.register(SkillsModClient::playerJoin);
-        
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openSkillsScreenKeyBinding.wasPressed()) {
                 // Open the skills screen
-                client.setScreen(SkillsScreen.open());
+                client.setScreen(SkillsScreen.open(skillData));
             }
         });
         
@@ -65,9 +67,9 @@ public class SkillsModClient implements ClientModInitializer {
         
         ClientWorld world = client.world;
         if (world == null) return;
-        Entity target = world.getEntity(payload.playerUuid());
-        ClientPlayerEntity targetPlayer = target instanceof ClientPlayerEntity ? (ClientPlayerEntity) target : null;
+        PlayerEntity targetPlayer = world.getEntity(payload.playerUuid()) instanceof PlayerEntity pe ? pe : null;
         
+        SkillManager.updateSkills(targetPlayer, skillList, skillData);
     }
     
     public static void syncSkills() {

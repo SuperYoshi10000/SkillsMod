@@ -9,7 +9,7 @@ public record SkillList(Map<Skill, SkillInstance> skills) {
     public SkillInstance getSkillInstance(Identifier id) {
         Skill skill = SkillManager.getSkill(id);
         if (skill == null) return null;
-        return skills.computeIfAbsent(skill, SkillInstance::new);
+        return get(skill);
     }
     
     public static SkillList fromNbt(NbtCompound nbt) {
@@ -18,7 +18,7 @@ public record SkillList(Map<Skill, SkillInstance> skills) {
         for (String key : nbt.getKeys()) {
             Skill skill = SkillManager.getSkill(Identifier.of(key));
             if (skill == null) continue;
-            SkillInstance skillInstance = skillList.skills.computeIfAbsent(skill, SkillInstance::new);
+            SkillInstance skillInstance = skillList.get(skill);
             NbtCompound skillNbt = nbt.getCompoundOrEmpty(key);
             skillInstance.setLevel(skillNbt.getInt("level", 0));
             skillInstance.setXp(skillNbt.getInt("xp", 0));
@@ -46,6 +46,7 @@ public record SkillList(Map<Skill, SkillInstance> skills) {
         skills.putAll(skillList.skills);
     }
     public SkillInstance get(Skill skill) {
-        return skills.get(skill);
+        if (skill == null) return null;
+        return skills.computeIfAbsent(skill, SkillInstance::new);
     }
 }

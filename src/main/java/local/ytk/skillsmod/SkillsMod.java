@@ -63,7 +63,7 @@ public class SkillsMod implements ModInitializer {
         SkillData.PlayerSkillData playerState = SkillData.getPlayerState(player);
         SkillList skillList = playerState.skillList();
         skillUpdate: {
-            if (payload == SkillUpdatePayload.EMPTY) break skillUpdate; // request skill sync
+            if (payload.isEmpty()) break skillUpdate; // request skill sync
             if (payload.addLevels() > 1) break skillUpdate; // Prevent cheating
             SkillInstance newSkillInstance = payload.skillInstance();
             SkillInstance playerSkillInstance = skillList.get(newSkillInstance.skill);
@@ -76,10 +76,12 @@ public class SkillsMod implements ModInitializer {
         syncSkills(player.server, player, skillList);
     }
     
-    public static void syncSkills(MinecraftServer server, ServerPlayerEntity target, SkillList skills) {
-        server.getPlayerManager().sendToAll(SkillListSyncPayload.createPacket(target, skills));
+    public static void syncSkills(MinecraftServer server, ServerPlayerEntity target, SkillList skillList) {
+        SkillManager.updateSkills(target, skillList);
+        server.getPlayerManager().sendToAll(SkillListSyncPayload.createPacket(target, skillList));
     }
-    public static void syncSkills(ServerPlayerEntity player, ServerPlayerEntity target, SkillList skills) {
-        player.networkHandler.sendPacket(SkillListSyncPayload.createPacket(target, skills));
+    public static void syncSkills(ServerPlayerEntity player, ServerPlayerEntity target, SkillList skillList) {
+        SkillManager.updateSkills(target, skillList);
+        player.networkHandler.sendPacket(SkillListSyncPayload.createPacket(target, skillList));
     }
 }

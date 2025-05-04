@@ -1,9 +1,6 @@
 package local.ytk.skillsmod.client.gui;
 
-import local.ytk.skillsmod.skills.HasSkills;
-import local.ytk.skillsmod.skills.SkillInstance;
-import local.ytk.skillsmod.skills.SkillList;
-import local.ytk.skillsmod.skills.SkillManager;
+import local.ytk.skillsmod.skills.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
@@ -19,11 +16,11 @@ public class SkillListWidget extends ElementListWidget<SkillListWidget.Entry> {
     private final PlayerEntity player;
     private final SkillList playerSkillList;
     
-    public SkillListWidget(MinecraftClient minecraftClient, SkillsScreen screen, int width, int height, int y, int itemHeight) {
+    public SkillListWidget(MinecraftClient minecraftClient, SkillsScreen screen, int width, int height, int y, int itemHeight, SkillData skillData) {
         super(minecraftClient, width, height, y, itemHeight, HEADER_HEIGHT);
         player = minecraftClient.player;
         if (player == null) throw new IllegalStateException("Player is null");
-        playerSkillList = SkillManager.getSkills(player);
+        playerSkillList = SkillManager.getSkills(player, skillData);
         
         SkillManager.INSTANCE.skills.forEach((id, skill) -> {
             Text skillName = Text.translatable(id.toTranslationKey("skill"));

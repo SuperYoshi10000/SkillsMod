@@ -11,13 +11,14 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class Skill {
+public class Skill implements Comparable<Skill> {
     public static final IntStream DEFAULT_XP_REQUIRED = IntStream.range(0, 100).map(i -> 100 * i);
     
     public static final Codec<Skill> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -264,6 +265,12 @@ public class Skill {
                 "maxLevel=" + maxLevel + ", " +
                 "levels=" + levels + ", " +
                 "stackLowerLevels=" + stackLowerLevels +']';
+    }
+    
+    @Override
+    public int compareTo(@NotNull Skill other) {
+        if (other == this) return 0;
+        return this.id.compareTo(other.id);
     }
     
     public record Level(int xpRequired, List<LinkedEntityAttributeModifier> modifiers, List<StatusEffectInstance> effects) {

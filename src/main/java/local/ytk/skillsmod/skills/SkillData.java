@@ -30,7 +30,6 @@ public class SkillData extends PersistentState {
         for (UUID uuid : players.keySet()) {
             NbtCompound playerTag = new NbtCompound();
             playerTag.put("skills", getPlayerSkills(uuid).toNbt());
-            System.out.println("Writing skills: " + playerTag);
             skillTag.put(uuid == null ? "PLAYER" : uuid.toString(), playerTag);
         }
         nbt.put("players", skillTag);
@@ -67,17 +66,23 @@ public class SkillData extends PersistentState {
             return new PlayerSkillData(player.getUuid());
         }
         SkillData state = getServerState(server);
-        boolean isSingleplayer = server.isSingleplayer();
-        return state.players.computeIfAbsent(!isSingleplayer ? player.getUuid() : null, uuid -> new PlayerSkillData(player));
+        PlayerSkillData playerState = state.players.computeIfAbsent(player.getUuid(),
+                uuid -> state.players.computeIfAbsent(null, PlayerSkillData::new));
+        if (server.isSingleplayer()) state.players.put(null, playerState); // null represents the main player in a singleplayer world
+        return playerState;
+    }
+    
+    
+    public PlayerSkillData getLocalPlayerState(PlayerEntity player) {
+        assert player != null;
+        
+        return players.computeIfAbsent(player.getUuid(),
+                uuid -> players.computeIfAbsent(null, PlayerSkillData::new));
     }
     
     public record PlayerSkillData(SkillList skillList) {
         public PlayerSkillData(UUID uuid) {
             this(SkillManager.createEmptySkillList());
-        }
-        public PlayerSkillData(PlayerEntity player) {
-            this(SkillManager.createEmptySkillList());
-            skillList.putAll(SkillManager.getSkills(player));
         }
     }
 }

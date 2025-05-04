@@ -18,11 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class SkillManager implements SimpleSynchronousResourceReloadListener {
     public static final Gson GSON = new Gson();
@@ -42,10 +38,10 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
         return new SkillList(SkillManager.getSkills()
                 .stream()
                 .map(SkillInstance::new)
-                .collect(Collectors.toMap(SkillInstance::getSkill, v -> v)));
+                .collect(TreeMap::new, (m, i) -> m.put(i.skill, i), Map::putAll));
     }
     public static SkillList createEmptySkillList() {
-        return new SkillList(new HashMap<>());
+        return new SkillList(new TreeMap<>(Comparator.nullsLast(Skill::compareTo))); // Use TreeMap to keep the order of skills consistent
     }
     
     public static SkillInstance createInstance(Identifier id) {
@@ -64,10 +60,34 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
     public static SkillList getSkills(PlayerEntity player) {
         return SkillData.getPlayerState(player).skillList();
     }
-    public static void updateSkills(PlayerEntity player, SkillList skills) {
-        // Add attributes for skills
-        if (skills == null) skills = getSkills(player);
-        for (SkillInstance skill : skills.skills().values()) {
+    public static void setSkills(PlayerEntity player, SkillList skillList) {
+        getSkills(player).putAll(skillList);
+        //updateSkills(player, skillList);
+    }
+    public static void updateSkills(PlayerEntity player, SkillList skillList) {
+        // Add attributes for skillList
+        setSkills(player, skillList);
+        for (SkillInstance skill : skillList.skills().values()) {
+            if (skill.level == 0) continue; // No need to add attributes for level 0
+            for (LinkedEntityAttributeModifier modifier : skill.skill.getModifiers(Math.min(skill.level, skill.skill.maxLevel))) {
+                EntityAttributeInstance attributeInstance = player.getAttributeInstance(modifier.attributeEntry());
+                if (attributeInstance == null) attributeInstance = new EntityAttributeInstance(modifier.attributeEntry(), a -> {});
+                attributeInstance.overwritePersistentModifier(modifier.toEntityAttributeModifier());
+            }
+        }
+    }
+    
+    public static SkillList getSkills(PlayerEntity player, SkillData data) {
+        return data.getLocalPlayerState(player).skillList();
+    }
+    public static void setSkills(PlayerEntity player, SkillList skillList, SkillData data) {
+        getSkills(player, data).putAll(skillList);
+        //updateSkills(player, skillList);
+    }
+    public static void updateSkills(PlayerEntity player, SkillList skillList, SkillData data) {
+        // Add attributes for skillList
+        setSkills(player, skillList, data);
+        for (SkillInstance skill : skillList.skills().values()) {
             if (skill.level == 0) continue; // No need to add attributes for level 0
             for (LinkedEntityAttributeModifier modifier : skill.skill.getModifiers(Math.min(skill.level, skill.skill.maxLevel))) {
                 EntityAttributeInstance attributeInstance = player.getAttributeInstance(modifier.attributeEntry());
