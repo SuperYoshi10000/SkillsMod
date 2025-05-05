@@ -112,7 +112,6 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
     public void reload(ResourceManager manager) {
         Map<Identifier, Resource> resources = manager.findResources("skill", path -> path.getPath().endsWith(".json"));
         for (Map.Entry<Identifier, Resource> entry : resources.entrySet()) {
-            Identifier id = entry.getKey();
             Resource resource = entry.getValue();
             try (InputStream stream = resource.getInputStream()) {
                 String content = new String(stream.readAllBytes());

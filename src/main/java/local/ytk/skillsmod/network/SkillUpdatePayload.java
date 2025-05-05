@@ -32,7 +32,6 @@ public record SkillUpdatePayload(SkillInstance skillInstance, int addLevels, int
         LOGGER.info("Reading payload{}", skillInstance.skill != null ? ": " + skillInstance.skill.id : "");
     }
     public static void write(RegistryByteBuf buf, SkillUpdatePayload payload) {
-        NbtCompound nbt = new NbtCompound();
         SkillInstance skillInstance = payload.skillInstance;
         if (skillInstance != null) buf.writeNbt(skillInstance.toNbt());
         else buf.writeNbt(NbtEnd.INSTANCE);

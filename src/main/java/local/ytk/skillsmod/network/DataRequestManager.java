@@ -1,7 +1,6 @@
 package local.ytk.skillsmod.network;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
 
 import java.util.*;
 import java.util.function.BiConsumer;

@@ -15,11 +15,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.lwjgl.glfw.GLFW;
 
@@ -63,7 +61,6 @@ public class SkillsModClient implements ClientModInitializer {
     private void handleSkillList(SkillListSyncPayload payload, ClientPlayNetworking.Context context) {
         SkillList skillList = payload.skillList();
         MinecraftClient client = context.client();
-        ClientPlayerEntity player = context.player();
         
         ClientWorld world = client.world;
         if (world == null) return;
