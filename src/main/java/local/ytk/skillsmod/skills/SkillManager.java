@@ -28,6 +28,12 @@ public class SkillManager implements SimpleSynchronousResourceReloadListener {
     
     public final Map<Identifier, Skill> skills = new HashMap<>();
     
+    public static boolean hasSkill(Identifier id) {
+        return INSTANCE.skills.containsKey(id);
+    }
+    public static boolean hasSkill(Skill skill) {
+        return INSTANCE.skills.containsValue(skill);
+    }
     public static Skill getSkill(Identifier id) {
         return INSTANCE.skills.get(id);
     }

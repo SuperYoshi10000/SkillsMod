@@ -49,4 +49,8 @@ public record SkillList(Map<Skill, SkillInstance> skills) {
         if (skill == null) return null;
         return skills.computeIfAbsent(skill, SkillInstance::new);
     }
+    
+    public boolean isEmpty() {
+        return skills.isEmpty();
+    }
 }

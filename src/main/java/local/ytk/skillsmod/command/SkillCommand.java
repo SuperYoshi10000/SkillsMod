@@ -16,11 +16,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.ParsedSelector;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-import java.util.Optional;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -79,22 +78,17 @@ public class SkillCommand {
     }
     
     
-    private static Text getName(PlayerEntity player) {
-        // Get the name of the player
-        return ParsedSelector.parse(player.getUuidAsString())
-                .map(p -> Text.selector(p, Optional.empty()))
-                .resultOrPartial()
-                .orElse(Text.empty());
-    }
-    
     static int listAllSkills(CommandContext<ServerCommandSource> context) {
         // List all skills
-        Text message = SkillManager.getSkills().stream()
-                .map(skill -> Text.translatable("commands.skill.item.all",
-                        Text.translatable(skill.key),
-                        Text.literal(String.valueOf(skill.maxLevel))
-                ).append("\n"))
+        Collection<Skill> skills = SkillManager.getSkills();
+        
+        Text message = skills.isEmpty() ? Text.translatable("commands.skill.none") : skills.stream()
+                .map(skill -> Text.literal("\n").append(Text.translatable("commands.skill.item.all",
+                                Text.translatable(skill.key),
+                                Text.literal(String.valueOf(skill.maxLevel))
+                        )))
                 .reduce(Text.translatable("commands.skill.all"), MutableText::append);
+        
         context.getSource().sendMessage(message);
         return SUCCESS;
     }
@@ -102,14 +96,15 @@ public class SkillCommand {
         // List all skills for a player
         PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
         SkillList skillList = SkillManager.getSkills(player);
-        Text items = skillList.skills().values().stream()
-                .map(s -> Text.translatable("commands.skill.item.player",
-                        Text.translatable(s.skill.key),
-                        Text.literal(String.valueOf(s.level)),
-                        Text.literal(String.valueOf(s.xp))
-                ).append("\n"))
+        Text items = skillList.isEmpty() ? Text.translatable("commands.skill.player.none", player.getDisplayName()) : skillList.skills().values().stream()
+                .map(s -> Text.literal("\n").append(Text.translatable("commands.skill.item.player",
+                                Text.translatable(s.skill.key),
+                                Text.literal(String.valueOf(s.level)),
+                                Text.literal(String.valueOf(s.xp))
+                        )))
                 .reduce(Text.empty(), MutableText::append);
-        Text message = Text.translatable("commands.skill.player", getName(player)).append("\n").append(items);
+        // Get the name of the player
+        Text message = Text.translatable("commands.skill.player", player.getDisplayName()).append(items);
         context.getSource().sendMessage(message);
         return SUCCESS;
     }
@@ -120,11 +115,14 @@ public class SkillCommand {
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
-            skill = SkillManager.createInstance(id);
-//            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+            if (!SkillManager.hasSkill(id)) {
+                context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+                return FAILURE;
+            } else skill = SkillManager.createInstance(id);
         }
+        // Get the name of the player
         Text message = Text.translatable("commands.skill.player.value",
-                getName(player),
+                player.getDisplayName(),
                 Text.translatable(skill.skill.key),
                 Text.literal(String.valueOf(skill.level)),
                 Text.literal(String.valueOf(skill.xp))
@@ -138,8 +136,10 @@ public class SkillCommand {
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
-            skill = SkillManager.createInstance(id);
-//            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+            if (!SkillManager.hasSkill(id)) {
+                context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+                return FAILURE;
+            } else skill = SkillManager.createInstance(id);
         }
         Text message = Text.translatable("commands.skill.item.player.level",
                 Text.translatable(skill.skill.key),
@@ -155,8 +155,10 @@ public class SkillCommand {
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
-            skill = SkillManager.createInstance(id);
-//            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+            if (!SkillManager.hasSkill(id)) {
+                context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+                return FAILURE;
+            } else skill = SkillManager.createInstance(id);
         }
         Text message = Text.translatable("commands.skill.item.player.level_xp",
                 Text.translatable(skill.skill.key),
@@ -172,16 +174,19 @@ public class SkillCommand {
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
-            skill = SkillManager.createInstance(id);
-//            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+            if (!SkillManager.hasSkill(id)) {
+                context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+                return FAILURE;
+            } else skill = SkillManager.createInstance(id);
         }
         int level = IntegerArgumentType.getInteger(context, "levels");
         int xp = IntegerArgumentType.getInteger(context, "xp");
         skill.setLevel(level);
         skill.setXp(xp);
         SkillManager.updateSkills(player, skillList);
+        // Get the name of the player
         Text message = Text.translatable("commands.skill.player.set",
-                getName(player),
+                player.getDisplayName(),
                 Text.translatable(skill.skill.key),
                 Text.literal(String.valueOf(skill.level)),
                 Text.literal(String.valueOf(skill.xp))
@@ -196,14 +201,17 @@ public class SkillCommand {
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
-            skill = SkillManager.createInstance(id);
-//            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+            if (!SkillManager.hasSkill(id)) {
+                context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+                return FAILURE;
+            } else skill = SkillManager.createInstance(id);
         }
         int level = IntegerArgumentType.getInteger(context, "levels");
         skill.setLevel(level);
         SkillManager.updateSkills(player, skillList);
+        // Get the name of the player
         Text message = Text.translatable("commands.skill.player.set",
-                getName(player),
+                player.getDisplayName(),
                 Text.translatable(skill.skill.key),
                 Text.literal(String.valueOf(skill.level)),
                 Text.literal(String.valueOf(skill.xp))
@@ -219,14 +227,17 @@ public class SkillCommand {
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
-            skill = SkillManager.createInstance(id);
-//            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+            if (!SkillManager.hasSkill(id)) {
+                context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+                return FAILURE;
+            } else skill = SkillManager.createInstance(id);
         }
         int xp = IntegerArgumentType.getInteger(context, "xp");
         skill.setXp(xp);
         SkillManager.updateSkills(player, skillList);
+        // Get the name of the player
         Text message = Text.translatable("commands.skill.player.set",
-                getName(player),
+                player.getDisplayName(),
                 Text.translatable(skill.skill.key),
                 Text.literal(String.valueOf(skill.level)),
                 Text.literal(String.valueOf(skill.xp))
@@ -241,14 +252,17 @@ public class SkillCommand {
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
-            skill = SkillManager.createInstance(id);
-//            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+            if (!SkillManager.hasSkill(id)) {
+                context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+                return FAILURE;
+            } else skill = SkillManager.createInstance(id);
         }
         int levels = IntegerArgumentType.getInteger(context, "levels");
         skill.addLevels(levels, player);
         SkillManager.updateSkills(player, skillList);
+        // Get the name of the player
         Text message = Text.translatable("commands.skill.player.set",
-                getName(player),
+                player.getDisplayName(),
                 Text.translatable(skill.skill.key),
                 Text.literal(String.valueOf(skill.level)),
                 Text.literal(String.valueOf(skill.xp))
@@ -264,14 +278,17 @@ public class SkillCommand {
         Identifier id = IdentifierArgumentType.getIdentifier(context, "skill");
         SkillInstance skill = skillList.getSkillInstance(id);
         if (skill == null) {
-            skill = SkillManager.createInstance(id);
-//            context.getSource().sendError(Text.translatable("commands.skill.player.notfound", getName(player), id.toString()));
+            if (!SkillManager.hasSkill(id)) {
+                context.getSource().sendError(Text.translatable("commands.skill.player.notfound", player.getDisplayName(), id.toString()));
+                return FAILURE;
+            } else skill = SkillManager.createInstance(id);
         }
         int xp = IntegerArgumentType.getInteger(context, "xp");
         skill.addXp(xp, player);
         SkillsMod.syncSkills(context.getSource().getServer(), player, skillList);
+        // Get the name of the player
         Text message = Text.translatable("commands.skill.player.set",
-                getName(player),
+                player.getDisplayName(),
                 Text.translatable(skill.skill.key),
                 Text.literal(String.valueOf(skill.level)),
                 Text.literal(String.valueOf(skill.xp))

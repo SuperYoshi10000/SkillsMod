@@ -2,7 +2,6 @@ package local.ytk.skillsmod.skills;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.RegistryByteBuf;
@@ -70,7 +69,7 @@ public class SkillInstance {
         addXp(xp, player);
         // Copied from PlayerEntity, with addScore removed
         player.experienceProgress = player.experienceProgress + (float)xp / player.getNextLevelExperience();
-        player.totalExperience = MathHelper.clamp(player.totalExperience + xp, 0, Integer.MAX_VALUE);
+        player.totalExperience = MathHelper.clamp(player.totalExperience - xp, 0, Integer.MAX_VALUE);
         
         while (player.experienceProgress < 0.0F) {
             float f = player.experienceProgress * player.getNextLevelExperience();
