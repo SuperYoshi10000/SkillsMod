@@ -44,9 +44,9 @@ public class SkillCommand {
                                 .executes(SkillCommand::listSkillsForPlayer)
                                 .then(argument("skill", IdentifierArgumentType.identifier())
                                         .suggests(SkillCommand.SKILLS_SUGGESTIONS)
-                                        .executes(SkillCommand::getSkill)
-                                        .then(literal("level").executes(SkillCommand::getSkillLevel))
-                                        .then(literal("xp").executes(SkillCommand::getSkillXp)))))
+                                        .executes(SkillCommand::getSkill))))
+                                        //.then(literal("level").executes(SkillCommand::getSkillLevel))
+                                        //.then(literal("xp").executes(SkillCommand::getSkillXp))
                 .then(literal("set")
                         .then(argument("player", EntityArgumentType.player())
                                 .then(argument("skill", IdentifierArgumentType.identifier())
@@ -94,7 +94,7 @@ public class SkillCommand {
                         Text.translatable(skill.key),
                         Text.literal(String.valueOf(skill.maxLevel))
                 ).append("\n"))
-                .reduce(Text.empty(), MutableText::append);
+                .reduce(Text.translatable("commands.skill.all"), MutableText::append);
         context.getSource().sendMessage(message);
         return SUCCESS;
     }
@@ -180,6 +180,13 @@ public class SkillCommand {
         skill.setLevel(level);
         skill.setXp(xp);
         SkillManager.updateSkills(player, skillList);
+        Text message = Text.translatable("commands.skill.player.set",
+                getName(player),
+                Text.translatable(skill.skill.key),
+                Text.literal(String.valueOf(skill.level)),
+                Text.literal(String.valueOf(skill.xp))
+        );
+        context.getSource().sendMessage(message);
         return SUCCESS;
     }
     static int setSkillLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -195,6 +202,13 @@ public class SkillCommand {
         int level = IntegerArgumentType.getInteger(context, "levels");
         skill.setLevel(level);
         SkillManager.updateSkills(player, skillList);
+        Text message = Text.translatable("commands.skill.player.set",
+                getName(player),
+                Text.translatable(skill.skill.key),
+                Text.literal(String.valueOf(skill.level)),
+                Text.literal(String.valueOf(skill.xp))
+        );
+        context.getSource().sendMessage(message);
         return SUCCESS;
     }
     
@@ -211,6 +225,13 @@ public class SkillCommand {
         int xp = IntegerArgumentType.getInteger(context, "xp");
         skill.setXp(xp);
         SkillManager.updateSkills(player, skillList);
+        Text message = Text.translatable("commands.skill.player.set",
+                getName(player),
+                Text.translatable(skill.skill.key),
+                Text.literal(String.valueOf(skill.level)),
+                Text.literal(String.valueOf(skill.xp))
+        );
+        context.getSource().sendMessage(message);
         return SUCCESS;
     }
     static int addSkillLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -226,6 +247,13 @@ public class SkillCommand {
         int levels = IntegerArgumentType.getInteger(context, "levels");
         skill.addLevels(levels, player);
         SkillManager.updateSkills(player, skillList);
+        Text message = Text.translatable("commands.skill.player.set",
+                getName(player),
+                Text.translatable(skill.skill.key),
+                Text.literal(String.valueOf(skill.level)),
+                Text.literal(String.valueOf(skill.xp))
+        );
+        context.getSource().sendMessage(message);
         return SUCCESS;
     }
     
@@ -242,21 +270,24 @@ public class SkillCommand {
         int xp = IntegerArgumentType.getInteger(context, "xp");
         skill.addXp(xp, player);
         SkillsMod.syncSkills(context.getSource().getServer(), player, skillList);
+        Text message = Text.translatable("commands.skill.player.set",
+                getName(player),
+                Text.translatable(skill.skill.key),
+                Text.literal(String.valueOf(skill.level)),
+                Text.literal(String.valueOf(skill.xp))
+        );
+        context.getSource().sendMessage(message);
         return SUCCESS;
     }
     
     public static class SkillSuggestionProvider implements SuggestionProvider<ServerCommandSource> {
         @Override
         public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
-            System.out.println("Getting suggestions for skill command"); // debug
             // Provide suggestions for skills
             SkillManager.getSkills().stream()
-                    .filter(skill -> skill.key.endsWith(builder.getRemaining()))
-                    .peek(System.out::println) // debug
-                    .forEach(skill -> builder.suggest(skill.key));
-            System.out.println("Suggestions completed"); // debug
+                    .filter(skill -> skill.id.toString().endsWith(builder.getRemaining()))
+                    .forEach(skill -> builder.suggest(skill.id.toString()));
             return builder.buildFuture();
         }
-        
     }
 }

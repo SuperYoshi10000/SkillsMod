@@ -9,7 +9,6 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.StatusEffectSpriteManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -19,15 +18,15 @@ import java.util.List;
 
 public class SkillWidget extends ButtonWidget {
     static final int LINE_HEIGHT = 10;
-    static final int MARGIN_TOP = 6;
-    static final int MARGIN_SIDE = 10;
+    static final int MARGIN_TOP = 5;
+    static final int MARGIN_SIDE = 6;
     static final int ICON_SIZE = 18;
-    static final int TEXT_OFFSET = 2;
+    static final int TEXT_OFFSET = 6;
     static final int TEXT_MAIN_COLOR = 0xffffff;
     static final int TEXT_ALT_COLOR = 0xbfbfbf;
+    static final boolean SHOW_TOOLTIP = false;
     private final SkillsScreen screen;
     private final SkillInstance skillInstance;
-    public final StatusEffectSpriteManager spriteManager = MinecraftClient.getInstance().getStatusEffectSpriteManager();
     
     public SkillWidget(int width, int height, SkillInstance skillInstance, SkillsScreen screen) {
         // Text is empty because the skill text is rendered differently
@@ -88,12 +87,14 @@ public class SkillWidget extends ButtonWidget {
         context.drawTextWithShadow(screen.getTextRenderer(), nameText, textX, topLineY, TEXT_MAIN_COLOR);
         context.drawTextWithShadow(screen.getTextRenderer(), levelText, textX, bottomLineY, TEXT_ALT_COLOR);
         context.drawSpriteStretched(RenderLayer::getGuiTextured, getSkillIcon(skillInstance.skill), imageX, topLineY, ICON_SIZE, ICON_SIZE);
-        
-        List<LinkedEntityAttributeModifier> modifiers = skillInstance.skill.getModifiers(currentLevel);
-        Text tooltipText = modifiers.stream()
-                .map(SkillWidget::formatModifier)
-                .reduce(Text.empty(), MutableText::append, MutableText::append);
-        setTooltip(Tooltip.of(tooltipText));
+
+        if (SHOW_TOOLTIP) {
+            List<LinkedEntityAttributeModifier> modifiers = skillInstance.skill.getModifiers(currentLevel);
+            Text tooltipText = modifiers.stream()
+                    .map(SkillWidget::formatModifier)
+                    .reduce(Text.empty(), MutableText::append, MutableText::append);
+            setTooltip(Tooltip.of(tooltipText));
+        }
         
         assert client.player != null;
         active = client.player.totalExperience >= xpRequired; // Disable button if not enough XP

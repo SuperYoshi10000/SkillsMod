@@ -26,11 +26,8 @@ public abstract class MinecraftClientMixin implements HasSkillSpriteManager {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resource/ResourceReloadLogger;reload(Lnet/minecraft/client/resource/ResourceReloadLogger$ReloadReason;Ljava/util/List;)V")
     )
     public void init(CallbackInfo info) {
-        System.out.println("Initializing SkillSpriteManager"); // debug
         skillSpriteManager = new SkillSpriteManager(textureManager);
         resourceManager.registerReloader(skillSpriteManager);
-        System.out.println("SkillSpriteManager initialized"); // debug
-        
     }
     
     @Override

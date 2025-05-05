@@ -5,14 +5,16 @@
   "chat.type.skill.unlock": "%s has unlocked the skill %s",
   "chat.type.skill.levelup": "%s has leveled up the skill %s to level %s",
   
-  "commands.skill.item.player": "%s: Level %s, %sxp",
-  "commands.skill.item.player.level": "%s: Level %s",
-  "commands.skill.item.player.level_xp": "%s: %sxp",
-  "commands.skill.item.player.xp": "%s: %sxp total",
-  "commands.skill.item.all": "%s: %s levels",
+  "commands.skill.all": "Skills:",
+  "commands.skill.item.player": "- %s: Level %s, %sxp",
+  "commands.skill.item.player.level": "- %s: Level %s",
+  "commands.skill.item.player.level_xp": "- %s: %sxp",
+  "commands.skill.item.player.xp": "- %s: %sxp total",
+  "commands.skill.item.all": "- %s: %s levels",
   "commands.skill.player": "%s has the following skills:",
   "commands.skill.player.notfound": "%s does not have the skill %s",
-  "commands.skill.player.value": "%s skill %s: Level %s, %sxp",
+  "commands.skill.player.value": "%s skill %s has: Level %s, %sxp",
+  "commands.skill.player.set": "%s skill %s set to: Level %s, %sxp",
   
   
   "gui.skills.title": "Skills",
