@@ -64,14 +64,19 @@ public class SkillsMod implements ModInitializer {
         SkillList skillList = playerState.skillList();
         skillUpdate: {
             if (payload.isEmpty()) break skillUpdate; // request skill sync
-            if (payload.addLevels() > 1) break skillUpdate; // Prevent cheating
+            int addXp = payload.addXp();
+            int addLevels = payload.addLevels();
+            if (addLevels > 1) break skillUpdate; // Prevent cheating
             SkillInstance newSkillInstance = payload.skillInstance();
             SkillInstance playerSkillInstance = skillList.get(newSkillInstance.skill);
             int xpToNextLevel = playerSkillInstance.getXpToNextLevel();
-            int addXp = payload.addXp();
             if (player.totalExperience < xpToNextLevel + addXp) break skillUpdate; // Not enough XP
-            if (payload.addLevels() > 0) playerSkillInstance.spendXp(xpToNextLevel, player);
+            if (addLevels > 0) playerSkillInstance.spendXp(xpToNextLevel, player);
             if (addXp > 0) playerSkillInstance.spendXp(addXp, player);
+            
+            if (playerSkillInstance.skill.id.equals(id("max_health"))) {
+                player.heal(addLevels);
+            }
         }
         syncSkills(player.server, player, skillList);
     }
