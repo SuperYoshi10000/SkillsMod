@@ -5,8 +5,12 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements HasSkills {
@@ -40,14 +44,18 @@ public abstract class PlayerEntityMixin extends LivingEntity implements HasSkill
 //        SkillManager.setSkills(self, skillList);
 //    }
     
-//    @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-//    public void writeCustomDataToNbt(NbtCompound nbt, CallbackInfo info) {
-//        nbt.put("skills", dataTracker.get(SKILL_TRACKER).toNbt());
-//    }
-//
-//    @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-//    public void readCustomDataFromNbt(NbtCompound nbt, CallbackInfo info) {
-//        dataTracker.set(SKILL_TRACKER, SkillList.fromNbt(nbt.getCompound("skills").orElse(new NbtCompound())));
-//    }
+    @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
+    public void writeCustomDataToNbt(NbtCompound nbt, CallbackInfo info) {
+        if (getWorld().isClient) return;
+        nbt.put("skills", getSkills().toNbt());
+    }
+
+    @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
+    public void readCustomDataFromNbt(NbtCompound nbt, CallbackInfo info) {
+        if (getWorld().isClient) return;
+        NbtCompound skills = nbt.getCompoundOrEmpty("skills");
+        SkillList skillList = SkillList.fromNbt(skills);
+        SkillManager.setSkills((PlayerEntity) (Object) this, skillList);
+    }
     
 }
