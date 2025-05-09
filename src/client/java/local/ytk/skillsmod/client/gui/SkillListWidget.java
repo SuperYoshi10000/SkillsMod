@@ -7,18 +7,16 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
 
 import java.util.List;
 
 public class SkillListWidget extends ElementListWidget<SkillListWidget.Entry> {
-    public static final int HEADER_HEIGHT = 24;
-    private final PlayerEntity player;
+    public static final int HEADER_HEIGHT = 0;
     private final SkillList playerSkillList;
     
     public SkillListWidget(MinecraftClient minecraftClient, SkillsScreen screen, int width, int height, int y, int itemHeight, SkillData skillData) {
         super(minecraftClient, width, height, y, itemHeight, HEADER_HEIGHT);
-        player = minecraftClient.player;
+        PlayerEntity player = minecraftClient.player;
         if (player == null) throw new IllegalStateException("Player is null");
         playerSkillList = SkillManager.getSkills(player, skillData);
         

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class SkillsScreen extends Screen {
     private static final Logger LOGGER = LoggerFactory.getLogger(SkillsScreen.class);
+    public static final int HEADER_HEIGHT = 20;
     protected SkillListWidget skillList;
     private final SkillData skillData;
     
@@ -27,7 +28,7 @@ public class SkillsScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        skillList = new SkillListWidget(client, this, Math.clamp(this.width, 300, 500), this.height, 20, 33, skillData);
+        skillList = new SkillListWidget(client, this, this.width, this.height - HEADER_HEIGHT, HEADER_HEIGHT, 33, skillData);
         skillList.setX(width / 2 - skillList.getWidth() / 2);
         addDrawableChild(skillList);
     }
