@@ -68,7 +68,7 @@ public class SkillInstance {
     public void spendXp(int xp, PlayerEntity player) {
         addXp(xp, player);
         // Copied from PlayerEntity, with addScore removed
-        player.experienceProgress = player.experienceProgress + (float)xp / player.getNextLevelExperience();
+        player.experienceProgress -= (float) xp / player.getNextLevelExperience();
         player.totalExperience = MathHelper.clamp(player.totalExperience - xp, 0, Integer.MAX_VALUE);
         
         while (player.experienceProgress < 0.0F) {

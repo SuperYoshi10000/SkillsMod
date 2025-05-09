@@ -33,6 +33,11 @@ public class SkillsScreen extends Screen {
     }
     
     @Override
+    public boolean shouldPause() {
+        return false;
+    }
+    
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         super.render(context, mouseX, mouseY, deltaTicks);
         if (client == null) {
@@ -41,5 +46,10 @@ public class SkillsScreen extends Screen {
             client = MinecraftClient.getInstance();
         }
         context.drawTextWithShadow(client.textRenderer, title, width / 2 - client.textRenderer.getWidth(title) / 2, 5, 0xFFFFFF);
+    }
+    
+    @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+        this.renderInGameBackground(context);
     }
 }
