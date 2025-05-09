@@ -23,6 +23,8 @@ import net.minecraft.util.Identifier;
 
 public class SkillsMod implements ModInitializer {
     public static final String MOD_ID = "skills";
+    public static final Identifier MAX_HEALTH_SKILL_ID = id("max_health");
+    
     public static Identifier id(String path) {
         return Identifier.of(MOD_ID, path);
     }
@@ -56,6 +58,10 @@ public class SkillsMod implements ModInitializer {
     private static void playerRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, boolean alive) {
         syncSkills(oldPlayer.server, oldPlayer, SkillManager.getSkills(oldPlayer));
         syncSkills(newPlayer.server, newPlayer, SkillManager.getSkills(newPlayer));
+        
+        SkillData.PlayerSkillData playerState = SkillData.getPlayerState(newPlayer);
+        SkillInstance skillInstance = playerState.skillList().getSkillInstance(MAX_HEALTH_SKILL_ID);
+        if (skillInstance != null) newPlayer.heal(skillInstance.getLevel());
     }
     
     private void handleSkillUpdate(SkillUpdatePayload payload, ServerPlayNetworking.Context context) {
@@ -74,7 +80,7 @@ public class SkillsMod implements ModInitializer {
             if (addLevels > 0) playerSkillInstance.spendXp(xpToNextLevel, player);
             if (addXp > 0) playerSkillInstance.spendXp(addXp, player);
             
-            if (playerSkillInstance.skill.id.equals(id("max_health"))) {
+            if (playerSkillInstance.skill.id.equals(MAX_HEALTH_SKILL_ID)) {
                 player.heal(addLevels);
             }
         }
