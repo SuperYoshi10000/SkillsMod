@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -212,13 +213,13 @@ public class Skill implements Comparable<Skill> {
         if (level == 0) return List.of();
         List<LinkedEntityAttributeModifier> modifiers;
         if (allLevels != null) {
-            modifiers = allLevels.modifiers.stream().map(m -> new LinkedEntityAttributeModifier(m.attribute(), m.id(), m.value() * level, m.operation())).toList();
+            modifiers = allLevels.modifiers.stream().map(m -> new LinkedEntityAttributeModifier(m.attribute(), m.id(), m.value() * level, m.operation())).collect(Collectors.toList());
         } else if (stackLowerLevels) {
             Multimap<EntityAttribute, LinkedEntityAttributeModifier> map = HashMultimap.create();
             levels.subList(0, Math.min(level, maxLevel)).forEach(l -> l.modifiers.forEach(m -> map.put(m.attribute(), m)));
-            modifiers = map.asMap().entrySet().stream().flatMap(Skill::mergeSimilar).toList();
+            modifiers = map.asMap().entrySet().stream().flatMap(Skill::mergeSimilar).collect(Collectors.toList());
         } else {
-            modifiers = levels.get(Math.min(level, maxLevel) - 1).modifiers; // No optimization needed
+            modifiers = new ArrayList<>(levels.get(Math.min(level, maxLevel) - 1).modifiers); // No optimization needed
         }
         if (level >= maxLevel) modifiers.addAll(bonusModifiers);
         return modifiers;
