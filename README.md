@@ -1,6 +1,7 @@
 # SkillsMod
 
 This mod adds upgradeable skills to Minecraft.
+Download from [Modrinth](https://modrinth.com/mod/skillsmod)
 
 Download from [Modrinth](https://modrinth.com/mod/skillsmod)
 
