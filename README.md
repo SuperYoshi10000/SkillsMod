@@ -2,6 +2,8 @@
 
 This mod adds upgradeable skills to Minecraft.
 
+Download from [Modrinth](https://modrinth.com/mod/skillsmod)
+
 ## Skills
 There are currently 23 skills, but more will be added later. All current built in skills modify a vanilla attribute.
 
